@@ -1,0 +1,20 @@
+## Interface: 30000
+## Title: |cff4080d9n|rUnitFrames
+
+## Notes: A unit frame replacement.
+## Author: nekoh
+## Version: 1.1
+
+## OptionalDeps: LibHealComm-3.0
+
+libs\UTF8\utf8.lua
+
+core.xml
+
+common.lua
+player.lua
+pet.lua
+target.lua
+focus.lua
+targets.lua
+raid.lua

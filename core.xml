@@ -1,0 +1,22 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="core.lua" />
+	
+	<Script file="elements\name.lua" />
+	<Script file="elements\faction.lua" />
+	<Script file="elements\level.lua" />
+	<Script file="elements\powertype.lua" />
+	<Script file="elements\health.lua" />
+	<Script file="elements\power.lua" />
+	<Script file="elements\combat.lua" />
+	<Script file="elements\aura.lua" />
+	<Script file="elements\combattext.lua" />
+	<Script file="elements\combopoints.lua" />
+	<Script file="elements\portrait.lua" />
+	<Script file="elements\raidtarget.lua" />
+	<Script file="elements\range.lua" />
+	<Script file="elements\resting.lua" />
+	<Script file="elements\threat.lua" />
+	
+	<Include file="libs\LibHealComm-3.0\lib.xml" />
+	<Script file="elements\xhealcomm.lua" />
+</Ui>
