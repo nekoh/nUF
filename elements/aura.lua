@@ -1,6 +1,5 @@
---[[--
-	function:
-		.updateAuras(o, event, unit)
+﻿--[[--
+	.updateAuras(o, event, unit)
 --]]--
 local objects = nUF.objects
 

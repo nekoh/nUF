@@ -1,12 +1,10 @@
---[[--
-	function:
-		.updatePlayerCombat(o, event, playerCombat)
-	vars:
-		.ePlayerCombat = UnitAffectingCombat("player")
+﻿--[[--
+	.updatePlayerCombat(o, event, playerCombat)
+	.ePlayerCombat = UnitAffectingCombat("player")
 --]]--
 function nUF:PLAYER_REGEN_DISABLED(event)
 	local inCombat = UnitAffectingCombat("player")
-	for _, o in pairs(nUF.objects) do
+	for _, o in next, nUF.objects do
 		if o.updatePlayerCombat then
 			o.ePlayerCombat = inCombat
 			o:updatePlayerCombat(event, inCombat)

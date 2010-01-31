@@ -1,4 +1,4 @@
---------------------------------------------------------------------------------
+﻿--------------------------------------------------------------------------------
 -- SETTINGS --------------------------------------------------------------------
 
 local s = {
@@ -15,7 +15,7 @@ local classSettings = {
 
 -- override default settings with class settings if available
 if classSettings[nUF.common.playerClass] then
-	for k,v in pairs(classSettings[nUF.common.playerClass]) do
+	for k,v in next, classSettings[nUF.common.playerClass] do
 		s[k] = v
 	end
 end
@@ -50,7 +50,12 @@ elseif nUF.common.playerClass == "PRIEST" then
 	playerDebuffs[GetSpellInfo(15286)] = 1 -- Vampiric Embrace
 	playerDebuffs[GetSpellInfo(34914)] = 1 -- Vampiric Touch
 elseif nUF.common.playerClass == "WARLOCK" then
-	playerDebuffs[GetSpellInfo(17800)] = 1 -- Shadow Mastery
+	playerDebuffs[GetSpellInfo(17800)] = 2 -- Shadow Mastery
+	playerDebuffs[GetSpellInfo(22959)] = 2 -- Improved Scorch
+	playerDebuffs[GetSpellInfo(12579)] = 2 -- Winter's Chill
+	playerDebuffs[GetSpellInfo(1490)] = 2 -- Curse of Elements
+	playerDebuffs[GetSpellInfo(60433)] = 2 -- Earth and Moon
+	playerDebuffs[GetSpellInfo(51735)] = 2 -- Ebon Plague
 elseif nUF.common.playerClass == "DRUID" then
 	playerDebuffs[GetSpellInfo(5570)] = 1 -- Insect Swarm
 	playerDebuffs[GetSpellInfo(8921)] = 1 -- Moonfire
@@ -68,7 +73,7 @@ local updateInfo
 do
 	local classhex = {}
 	do
-		for class, c in pairs(RAID_CLASS_COLORS) do
+		for class, c in next, RAID_CLASS_COLORS do
 			classhex[class] = ("%02X%02X%02X"):format(c.r * 255, c.g * 255, c.b * 255)
 		end
 	end
@@ -143,20 +148,20 @@ do
 			o.MyHealBar:Hide()
 		end
 		
-		if UnitIsFriend("player", unit) then
+		if UnitCanAttack("player", unit) then
+			o.HealthText:SetFormattedText("%s / %s  %.1f", shortValue(curHP), shortValue(maxHP), curHP/maxHP*100)
+		else
 			local missingHP = curHP==maxHP and "" or shortValue(curHP-maxHP)
 			o.HealthText:SetFormattedText("%s|cffff7f7f%s|r / %s", shortValue(curHP), missingHP, shortValue(maxHP))
-		else
-			o.HealthText:SetFormattedText("%s / %s  %.1f", shortValue(curHP), shortValue(maxHP), curHP/maxHP*100)
 		end
 	end
 end
 
-local updateHeals = function(o, event, unit, incHealBefore, incPlayerHeal, incHealAfter)
-	o.incHeal = floor(incHealBefore + incPlayerHeal + incHealAfter)
+local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
+	o.incHeal = incHealTotal
 	
 	o.incHealBefore = incHealBefore
-	o.incPlayerHeal = incPlayerHeal
+	o.incPlayerHeal = incHealPlayer
 	if o.incHeal > 0 then
 		o.HealText:SetFormattedText("+%s", nUF.common.shortValue(o.incHeal))
 	else
@@ -257,8 +262,8 @@ do
 		local i = 0
 		-- Cooldowns
 		cooldown_tables[1] = coolDowns[o.eClass]
-		for _, cds in pairs(cooldown_tables) do
-			for _, auraName in ipairs(cds) do
+		for _, cds in next, cooldown_tables do
+			for _, auraName in next, cds do
 				local name, _, texture, charges, debuffType, duration, expirationTime = UnitAura(unit, auraName, nil, "HELPFUL")
 				if name then
 					i = i + 1
@@ -268,7 +273,7 @@ do
 			end
 		end
 		-- Player Buffs
-		for auraName, self in pairs(playerBuffs) do
+		for auraName, self in next, playerBuffs do
 			local name, _, texture, charges, debuffType, duration, expirationTime, caster = UnitAura(unit, auraName, nil, "HELPFUL")
 			if name and (self==2 or caster=="player") then
 				i = i + 1
@@ -277,7 +282,7 @@ do
 			end
 		end
 		-- Player Debuffs
-		for auraName, self in pairs(playerDebuffs) do
+		for auraName, self in next, playerDebuffs do
 			local name, _, texture, charges, debuffType, duration, expirationTime, caster = UnitAura(unit, auraName, nil, "HARMFUL")
 			if name and (self==2 or caster=="player") then
 				i = i + 1
@@ -304,7 +309,6 @@ local function style(o)
 	o:SetAttribute("*type2", "menu")
 	
 	o:SetScript("OnEnter", UnitFrame_OnEnter)
-	o:SetScript("OnLeave", UnitFrame_OnLeave)
 	
 	o:SetBackdrop(nUF.common.framebackdrop)
 	o:SetBackdropColor(0, 0, 0, 1)

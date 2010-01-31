@@ -1,4 +1,4 @@
---------------------------------------------------------------------------------
+﻿--------------------------------------------------------------------------------
 -- SETTINGS --------------------------------------------------------------------
 
 local s = {
@@ -22,7 +22,7 @@ local classSettings = {
 
 -- override default settings with class settings if available
 if classSettings[nUF.common.playerClass] then
-	for k,v in pairs(classSettings[nUF.common.playerClass]) do
+	for k,v in next, classSettings[nUF.common.playerClass] do
 		s[k] = v
 	end
 end
@@ -39,8 +39,20 @@ elseif nUF.common.playerClass == "PRIEST" then
 	playerProccs[GetSpellInfo(34754)] = "HELPFUL" -- Holy Concentration
 	playerProccs[GetSpellInfo(63731)] = "HELPFUL" -- Serendipity
 	playerProccs[GetSpellInfo(52795)] = "HELPFUL" -- Borrowed Time
+	playerProccs[GetSpellInfo(17)] = "HELPFUL" -- Power Word: Shield
+	playerProccs[GetSpellInfo(33076)] = "HELPFUL" -- Prayer of Mending
+	playerProccs[GetSpellInfo(552)] = "HELPFUL" -- Ablish Disease
+	playerProccs[GetSpellInfo(139)] = "HELPFUL|PLAYER" -- Renew
 elseif nUF.common.playerClass == "DRUID" then
 	playerProccs[GetSpellInfo(16870)] = "HELPFUL" -- Clearcasting
+elseif nUF.common.playerClass == "WARLOCK" then
+	playerProccs[GetSpellInfo(17941)] = "HELPFUL" -- Shadow Trance
+	playerProccs[GetSpellInfo(64368)] = "HELPFUL" -- Eradication
+	playerProccs[GetSpellInfo(71165)] = "HELPFUL" -- Molten Core
+	playerProccs[GetSpellInfo(63167)] = "HELPFUL" -- Decimation
+	playerProccs[GetSpellInfo(34936)] = "HELPFUL" -- Backlash
+	playerProccs[GetSpellInfo(47283)] = "HELPFUL" -- Empowered Imp
+	playerProccs[GetSpellInfo(54274)] = "HELPFUL" -- Backdraft
 end
 -- Self Buffs ------------------------------------------------------------------
 local selfBuffs = {}
@@ -78,7 +90,7 @@ do
 		}
 	end
 	spellIcon, spellName = nil, nil
-	for icon, t in pairs(nUF.common.missingBuffs) do
+	for icon, t in next, nUF.common.missingBuffs do
 		selfBuffs[icon] = t
 	end
 end
@@ -133,8 +145,8 @@ do
 	end
 end
 
-local updateHeals = function(o, event, unit, incHealBefore, incPlayerHeal, incHealAfter)
-	o.incHeal = floor(incHealBefore + incPlayerHeal + incHealAfter)
+local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
+	o.incHeal = incHealTotal
 	if o.eDisabled then return end
 	updateHealth(o, "updateHeals", unit, o.eHealth, o.eHealthMax)
 end
@@ -200,18 +212,81 @@ end
 local updateAuras
 do
 	local UnitAura = UnitAura
-	local size = s.HealthBarHeight+s.PowerBarHeight+3
+	local createAura = nUF.common.createAura
 	local setAura = nUF.common.setAura
 	local getAura = nUF.common.getAura
+	local dispelPrio = {
+		Magic = 4,
+		Curse = 3,
+		Poison = 2,
+		Disease = 1,
+	}
+	if nUF.common.playerClass == "PRIEST" then
+		dispelPrio.Curse = nil
+		dispelPrio.Poison = nil
+	elseif nUF.common.playerClass == "SHAMAN" then
+		dispelPrio.Magic = nil
+	elseif nUF.common.playerClass == "PALADIN" then
+		dispelPrio.Curse = nil
+	elseif nUF.common.playerClass == "MAGE" then
+		dispelPrio.Magic = nil
+		dispelPrio.Poison = nil
+		dispelPrio.Disease = nil
+	elseif nUF.common.playerClass == "DRUID" then
+		dispelPrio.Magic = nil
+		dispelPrio.Disease = nil
+	elseif nUF.common.playerClass == "WARLOCK" then
+		dispelPrio.Curse = nil
+		dispelPrio.Poison = nil
+		dispelPrio.Disease = nil
+	end
+	local size = s.HealthBarHeight+s.PowerBarHeight+3
 	local auras = {}
+	local debuffs = {}
 	local buffcolor = {r=0, g=0, b=0}
 	updateAuras = function(o, event, unit)
-		local i = 0
+		local lastprio = 0
+		local dc = nil
 		
+		for i = 1, 32 do
+			local name, _, texture, charges, debuffType, duration, expirationTime = UnitAura(unit, i, "HARMFUL")
+			if name then
+				local debuff = debuffs[i]
+				if not debuff then
+					debuff = createAura(o, unit, i, size)
+					debuff.filter = "HARMFUL"
+					if i == 1 then
+						debuff:SetPoint("TOPLEFT", o, "BOTTOMRIGHT", 1, -1)
+					else
+						debuff:SetPoint("LEFT", debuffs[i-1], "RIGHT", 1, 0)
+					end
+					debuffs[i] = debuff
+				end
+				local c = DebuffTypeColor[debuffType] or DebuffTypeColor.none
+				setAura(debuff, c, texture, charges, duration, expirationTime)
+				
+				local prio = dispelPrio[debuffType]
+				if prio and prio > lastprio then
+					lastprio = prio
+					dc = DebuffTypeColor[debuffType]
+				end
+			elseif debuffs[i] then
+				debuffs[i]:Hide()
+			else break
+			end
+		end
+		
+		if dc then
+			o:SetBackdropColor(dc.r, dc.g, dc.b, 1)
+		else
+			o:SetBackdropColor(0, 0, 0, 1)
+		end
+		
+		local i = 0
 		-- Self/Missing Buffs
-		for texture, t in pairs(selfBuffs) do
+		for texture, t in next, selfBuffs do
 			local found = nil
-			for i, buffName in ipairs(t) do
+			for i, buffName in next, t do
 				if UnitAura(unit, buffName, nil, "HELPFUL") then
 					found = true
 					break
@@ -225,12 +300,12 @@ do
 		end
 		
 		-- Player Proccs
-		for proccName, filter in pairs(playerProccs) do
+		for proccName, filter in next, playerProccs do
 			local name, _, texture, charges, debuffType, duration, expirationTime = UnitAura(unit, proccName, nil, filter)
 			if name then
 				i = i + 1
 				local aura = getAura(o, auras, i, size)
-				local c = filter=="HELPFUL" and buffcolor or DebuffTypeColor[debuffType] or DebuffTypeColor.none
+				local c = filter=="HELPFUL" and buffcolor or filter=="HELPFUL|PLAYER" and buffcolor or DebuffTypeColor[debuffType] or DebuffTypeColor.none
 				setAura(aura, c, texture, charges, duration, expirationTime)
 			end
 		end
@@ -251,7 +326,6 @@ local function style(o)
 	o:SetAttribute("*type2", "menu")
 	
 	o:SetScript("OnEnter", function(...) if not o.ePlayerCombat then UnitFrame_OnEnter(...) end end)
-	o:SetScript("OnLeave", UnitFrame_OnLeave)
 	
 	o:RegisterForClicks("anyup")
 	

@@ -1,6 +1,5 @@
---[[--
-	function:
-		.updatePortrait(o, event, unit)
+﻿--[[--
+	.updatePortrait(o, event, unit)
 --]]--
 function nUF:UNIT_PORTRAIT_UPDATE(event, unit)
 	local o = nUF.objects[unit]

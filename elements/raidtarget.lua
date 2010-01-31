@@ -1,14 +1,12 @@
---[[--
-	function:
-		.updateRaidTarget(o, event, unit, raidTarget)
-	vars:
-		.eRaidTarget = GetRaidTargetIndex(unit)
+﻿--[[--
+	.updateRaidTarget(o, event, unit, raidTarget)
+	.eRaidTarget = GetRaidTargetIndex(unit)
 --]]--
 local	GetRaidTargetIndex =
 		GetRaidTargetIndex
 
 function nUF:RAID_TARGET_UPDATE(event)
-	for unit, o in pairs(nUF.objects) do
+	for unit, o in next, nUF.objects do
 		if o.updateRaidTarget then
 			o.eRaidTarget = GetRaidTargetIndex(unit) or 0
 			o:updateRaidTarget(event, unit, o.eRaidTarget)

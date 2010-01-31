@@ -1,9 +1,7 @@
---[[--
-	function:
-		.updatePower(o, event, unit, curPP, maxPP)
-	vars:
-		.ePower = UnitMana(unit)
-		.ePowerMax = UnitManaMax(unit)
+﻿--[[--
+	.updatePower(o, event, unit, curPP, maxPP)
+	.ePower = UnitMana(unit)
+	.ePowerMax = UnitManaMax(unit)
 --]]--
 local objects = nUF.objects
 

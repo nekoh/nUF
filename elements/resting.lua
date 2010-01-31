@@ -1,12 +1,10 @@
---[[--
-	function:
-		.updatePlayerResting(o, event, unit)
-	vars:
-		.ePlayerResting = IsResting()
+﻿--[[--
+	.updatePlayerResting(o, event, unit)
+	.ePlayerResting = IsResting()
 --]]--
 function nUF:PLAYER_UPDATE_RESTING(event)
 	local resting = IsResting()
-	for unit, o in pairs(nUF.objects) do
+	for unit, o in next, nUF.objects do
 		if o.updatePlayerResting then
 			o.ePlayerResting = resting
 			o:updatePlayerResting(event, resting)

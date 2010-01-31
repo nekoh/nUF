@@ -1,67 +1,70 @@
---[[--
-	function:
-		.updateHealComm(o, event, unit, healsBefore, playerHeals, healsAfter)
+﻿--[[--
+	.updateHealComm(o, event, unit, healsTotal, healsPlayer, healsBefore)
 --]]--
-local HealComm = LibStub("LibHealComm-3.0")
+local HealComm = LibStub("LibHealComm-4.0")
+local HealWithin = 3.1
 
-local	UnitName =
-		UnitName
+local GetTime = GetTime
 
-local playerName = UnitName("player")
-local playerHeals = {}
-local playerTime = 0
+local playerGUID = nil
+local playerTime = nil
 
+local updateUnit = {}
 local updateHeals = function(...)
-	for i = 1, select("#", ...) do
-		local name = select(i, ...)
-		
-		for unit,o in pairs(nUF.objects) do
-			if o.updateHealComm then
-				local uname = o.eServer and (o.eName.."-"..o.eServer) or o.eName
-				if name == uname then
-					local healsBefore, healsAfter = HealComm:UnitIncomingHealGet(name, playerTime)
-					local healModifier = HealComm:UnitHealModifierGet(name)
-					o:updateHealComm("HealUpdate", unit, (healsBefore or 0)*healModifier, (playerHeals[name] or 0)*healModifier, (healsAfter or 0)*healModifier)
-				end
-			end
+	for i=1, select("#", ...) do
+		updateUnit[select(i, ...)] = true
+	end
+	
+	for unit,o in next, nUF.objects do
+		if o.updateHealComm and updateUnit[o.eGUID] then
+			local healsPlayer = playerTime and HealComm:GetHealAmount(o.eGUID, HealComm.CASTED_HEALS, playerTime, playerGUID) or 0
+			local healsBefore = HealComm:GetOthersHealAmount(o.eGUID, HealComm.ALL_HEALS, playerTime) or 0
+			local healsTotal = HealComm:GetHealAmount(o.eGUID, HealComm.ALL_HEALS, GetTime() + HealWithin) or 0
+			local healModifier = HealComm:GetHealModifier(o.eGUID)
+			o:updateHealComm("HealUpdate", unit, healsTotal*healModifier, healsPlayer*healModifier, healsBefore*healModifier)
 		end
 	end
+	table.wipe(updateUnit)
 end
 
 -- LibHealComm callbacks
-local function DirectHealStart(event, healerName, healSize, endTime, ...)
-	if healerName == playerName then
-		for i = 1, select("#", ...) do
-			playerHeals[select(i, ...)] = healSize
+local HealUpdate
+HealUpdate = function(...)
+	playerGUID = UnitGUID("player")
+	HealUpdate = function(event, casterGUID, spellID, healType, endTime, ...)
+		if casterGUID == playerGUID and (healType == HealComm.DIRECT_HEALS or healType == HealComm.CHANNEL_HEALS) then
+			playerTime = endTime
 		end
-		playerTime = endTime
+		updateHeals(...)
+	end
+	HealUpdate(...)
+end
+
+local HealStop = function(event, casterGUID, spellID, healType, interruptType, ...)
+	if casterGUID == playerGUID and (healType == HealComm.DIRECT_HEALS or healType == HealComm.CHANNEL_HEALS) then
+		playerTime = nil
 	end
 	updateHeals(...)
 end
 
-local function DirectHealStop(event, healerName, healSize, succeeded, ...)
-	if healerName == playerName then
-		playerHeals = wipe(playerHeals)
-	end
-	updateHeals(...)
-end
-
-local function HealModifierUpdate(event, unit, targetName, healModifier)
-	updateHeals(targetName)
-end
-
+local HealModifierUpdate = function(event, guid)
+	updateHeals(guid)
+end 
 -- element activation
-HealComm.RegisterCallback("nUF_HealComm", "HealComm_DirectHealStart", DirectHealStart)
-HealComm.RegisterCallback("nUF_HealComm", "HealComm_DirectHealDelayed", DirectHealStart)
-HealComm.RegisterCallback("nUF_HealComm", "HealComm_DirectHealStop", DirectHealStop)
-HealComm.RegisterCallback("nUF_HealComm", "HealComm_HealModifierUpdate", HealModifierUpdate)
+HealComm.RegisterCallback("nUF_HealComm", "HealComm_HealStarted", HealUpdate)
+HealComm.RegisterCallback("nUF_HealComm", "HealComm_HealUpdated", HealUpdate)
+HealComm.RegisterCallback("nUF_HealComm", "HealComm_HealDelayed", HealUpdate)
+HealComm.RegisterCallback("nUF_HealComm", "HealComm_HealStopped", HealStop)
+HealComm.RegisterCallback("nUF_HealComm", "HealComm_ModifierChanged", HealModifierUpdate)
+HealComm.RegisterCallback("nUF_HealComm", "HealComm_GUIDDisappeared", HealModifierUpdate)
 
 table.insert(nUF.element_update, function(nUF, event, unit)
 	local o = nUF.objects[unit]
 	if not o or not o.updateHealComm then return end
 	
-	local name = o.eServer and (o.eName.."-"..o.eServer) or o.eName
-	local healsBefore, healsAfter = HealComm:UnitIncomingHealGet(name, playerTime)
-	local healModifier = HealComm:UnitHealModifierGet(name)
-	o:updateHealComm(event, unit, (healsBefore or 0)*healModifier, (playerHeals[name] or 0)*healModifier, (healsAfter or 0)*healModifier)
+	local healsPlayer = playerTime and HealComm:GetHealAmount(o.eGUID, HealComm.CASTED_HEALS, playerTime, playerGUID) or 0
+	local healsBefore = HealComm:GetOthersHealAmount(o.eGUID, HealComm.ALL_HEALS, playerTime) or 0
+	local healsTotal = HealComm:GetHealAmount(o.eGUID, HealComm.ALL_HEALS, GetTime() + HealWithin) or 0
+	local healModifier = HealComm:GetHealModifier(o.eGUID)
+	o:updateHealComm(event, unit, healsTotal*healModifier, healsPlayer*healModifier, healsBefore*healModifier)
 end)

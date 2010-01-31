@@ -1,10 +1,8 @@
---[[--
-	function:
-		.updateHealth(o, event, unit, curHP, maxHP, disabled, oldDisabled)
-	vars:
-		.eHealth = UnitHealth(unit)
-		.eHealthMax = UnitHealthMax(unit)
-		.eDisabled = "DEAD", "Ghost", "Offline"
+﻿--[[--
+	.updateHealth(o, event, unit, curHP, maxHP, disabled, oldDisabled)
+	.eHealth = UnitHealth(unit)
+	.eHealthMax = UnitHealthMax(unit)
+	.eDisabled = "DEAD", "Ghost", "Offline"
 --]]--
 local objects = nUF.objects
 

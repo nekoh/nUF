@@ -1,11 +1,11 @@
-## Interface: 30000
+﻿## Interface: 30300
 ## Title: |cff4080d9n|rUnitFrames
 
 ## Notes: A unit frame replacement.
 ## Author: nekoh
 ## Version: 1.1
 
-## OptionalDeps: LibHealComm-3.0
+## OptionalDeps: LibHealComm-4.0
 
 libs\UTF8\utf8.lua
 

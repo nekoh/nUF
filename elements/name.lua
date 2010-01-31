@@ -1,9 +1,8 @@
---[[--
-	function:
-		.updateName(o, event, unit, name, server)
-	vars:
-		.eName, .eServer = UnitName(unit)
-		.eLClass, .eClass = UnitClass(unit)
+﻿--[[--
+	.updateName(o, event, unit, name, server, class, localized_class, guid)
+	.eName, .eServer = UnitName(unit)
+	.eLClass, .eClass = UnitClass(unit)
+	.eGUID = UnitGUID(unit)
 --]]--
 function nUF:UNIT_NAME_UPDATE(event, unit)
 	local o = nUF.objects[unit]
@@ -11,7 +10,8 @@ function nUF:UNIT_NAME_UPDATE(event, unit)
 	
 	o.eName, o.eServer = UnitName(unit)
 	o.eLClass, o.eClass = UnitClass(unit)
-	o:updateName(event, unit, o.eName, o.eServer, o.eClass, o.eLClass)
+	o.eGUID = UnitGUID(unit)
+	o:updateName(event, unit, o.eName, o.eServer, o.eClass, o.eLClass, o.eGUID)
 end
 
 -- element activation

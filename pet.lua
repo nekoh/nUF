@@ -1,4 +1,4 @@
---------------------------------------------------------------------------------
+﻿--------------------------------------------------------------------------------
 -- SETTINGS --------------------------------------------------------------------
 
 local s = {
@@ -15,7 +15,7 @@ local classSettings = {
 
 -- override default settings with class settings if available
 if classSettings[nUF.common.playerClass] then
-	for k,v in pairs(classSettings[nUF.common.playerClass]) do
+	for k,v in next, classSettings[nUF.common.playerClass] do
 		s[k] = v
 	end
 end
@@ -54,8 +54,8 @@ local updateHealth = function(o, event, unit, curHP, maxHP, disabled, olddisable
 	o.HealthText:SetFormattedText("%.0f%%", curHP/maxHP*100.0)
 end
 
-local updateHeals = function(o, event, unit, incHealBefore, incPlayerHeal, incHealAfter)
-	o.incHeal = floor(incHealBefore + incPlayerHeal + incHealAfter)
+local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
+	o.incHeal = incHealTotal
 	if o.eDisabled then return end
 	updateHealth(o, "updateHeals", unit, o.eHealth, o.eHealthMax)
 end
@@ -132,7 +132,6 @@ local function style(o)
 	o:SetAttribute("*type2", "menu")
 
 	o:SetScript("OnEnter", function(...) if not UnitAffectingCombat("player") then UnitFrame_OnEnter(...) end end)
-	o:SetScript("OnLeave", UnitFrame_OnLeave)
 
 	o:SetBackdrop(nUF.common.framebackdrop)
 	o:SetBackdropColor(0, 0, 0, 1)

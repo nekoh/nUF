@@ -1,14 +1,13 @@
---[[--
-	vars:
-		.unit
-		.id
+﻿--[[--
+	.unit
+	.id
 --]]--
 nUF = CreateFrame("Frame")
 nUF:SetScript("OnEvent", function(self, event, ...)
 	self[event](self, event, ...)
 end)
 
-local printf = function(text, ...) ChatFrame1:AddMessage(format("|cff33ff99nUF:|r "..text, ...)) end
+local printf = function(...) print("|cff33ff99nUF:|r ", ...) end
 local noop = function() end
 
 nUF.objects, nUF.element_init, nUF.element_update = {}, {}, {}
@@ -46,11 +45,11 @@ local disableBlizzard = function(unit)
 		FocusFrame.Show = noop
 		FocusFrame:Hide()
 	elseif unit == "targettarget" then
-		TargetofTargetFrame:UnregisterAllEvents()
-		TargetofTargetHealthBar:UnregisterAllEvents()
-		TargetofTargetManaBar:UnregisterAllEvents()
-		TargetofTargetFrame.Show = noop
-		TargetofTargetFrame:Hide()
+		TargetFrameToT:UnregisterAllEvents()
+		TargetFrameToTHealthBar:UnregisterAllEvents()
+		TargetFrameToTManaBar:UnregisterAllEvents()
+		TargetFrameToT.Show = noop
+		TargetFrameToT:Hide()
 	elseif unit == "party" then
 		for i=1,4 do
 			local party = "PartyMemberFrame"..i
@@ -68,7 +67,7 @@ end
 local updateElements = function(o, event)
 	if not UnitExists(o.unit) then return end
 
-	for i, f in pairs(nUF.element_update) do
+	for i, f in next, nUF.element_update do
 		f(nUF, event, o.unit)
 	end
 end
@@ -109,7 +108,7 @@ local registerUpdateEvents = function(o, unit)
 			timer = timer + elapsed
 			if not o.unit then
 				return
-			elseif timer >= .25 and UnitExists(o.unit) then
+			elseif timer >= .25 then
 				updateElements(o, "OnUpdate")
 				timer = 0
 			end
@@ -130,7 +129,7 @@ local initObject = function(o)
 	o:SetScript("OnEvent", updateElements)
 	o:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-	for f, v in pairs(nUF.element_init) do
+	for f, v in next, nUF.element_init do
 		f(o)
 	end
 
@@ -139,7 +138,7 @@ local initObject = function(o)
 end
 
 local multipleOnUpdate = function(o, elapsed)
-	for f, _ in pairs(o.onUpdates) do
+	for f, _ in next, o.onUpdates do
 		f(o, elapsed)
 	end
 end
@@ -189,7 +188,7 @@ function nUF:NewHeader(style, name, isPet)
 end
 
 function nUF:Integrity()
-	for unit,o in pairs(nUF.objects) do
+	for unit,o in next, nUF.objects do
 		local name, server = UnitName(unit)
 		if name ~= o.eName or server ~= o.eServer then
 			printf("%s-%s ~=? %s-%s", name, server or 'nil', o.eName, o.eServer)

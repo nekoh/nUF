@@ -1,6 +1,5 @@
---[[--
-	function:
-		.updateLevel(o, event, unit)
+﻿--[[--
+	.updateLevel(o, event, unit)
 --]]--
 function nUF:UNIT_LEVEL(event, unit)
 	local o = nUF.objects[unit]

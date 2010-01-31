@@ -1,6 +1,5 @@
---[[--
-	function:
-		.updateCombatText(o, event, unit, action, flags, amount, damageType)
+﻿--[[--
+	.updateCombatText(o, event, unit, action, flags, amount, damageType)
 --]]--
 local objects = nUF.objects
 

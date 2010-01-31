@@ -1,4 +1,4 @@
---------------------------------------------------------------------------------
+﻿--------------------------------------------------------------------------------
 -- SETTINGS --------------------------------------------------------------------
 
 -- default settings
@@ -37,7 +37,7 @@ local classSettings = {
 
 -- override default settings with class settings if available
 if classSettings[nUF.common.playerClass] then
-	for k,v in pairs(classSettings[nUF.common.playerClass]) do
+	for k,v in next, classSettings[nUF.common.playerClass] do
 		s[k] = v
 	end
 end
@@ -119,6 +119,7 @@ end
 -- Debuff BlackList ------------------------------------------------------------
 local blackList = {
 	[GetSpellInfo(26218)] = true, -- Mistletoe
+	[GetSpellInfo(24755)] = true, -- Tricked or Treated
 
 	[GetSpellInfo(6788)] = true, -- Weakened Soul
 	[GetSpellInfo(8326)] = true, -- Ghost
@@ -126,6 +127,8 @@ local blackList = {
 	[GetSpellInfo(41425)] = true, -- Hypothermia
 	[GetSpellInfo(57724)] = true, -- Sated (Bloodlust)
 	[GetSpellInfo(55711)] = true, -- Weakened Heart (Hunter)
+	[GetSpellInfo(38927)] = true, -- Fel Ache
+	[GetSpellInfo(36032)] = true, -- Arcane Blast (Mage)
 	
 	[GetSpellInfo(58539)] = true, -- Watcher's Corpse
 	
@@ -151,6 +154,11 @@ local blackList = {
 	[GetSpellInfo(64145)] = true, -- Yogg-Saron: Diminish Power
 	[GetSpellInfo(63138)] = true, -- Yogg-Saron: Sara's Fervor
 	[GetSpellInfo(67590)] = true, -- Twin Valkyr: Powering Up
+	[GetSpellInfo(66193)] = true, -- Anub'arak: Permafrost
+	[GetSpellInfo(67630)] = true, -- Anub'arak: Leeching Swarm
+	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
+	[GetSpellInfo(69127)] = true, -- ICC: Chill of the Throne
+	[GetSpellInfo(70867)] = true, -- Blood-Queen Lana'thel: Essence of the Blood Queen
 }
 
 --------------------------------------------------------------------------------
@@ -217,12 +225,12 @@ do
 	end
 end
 
-local updateHeals = function(o, event, unit, incHealBefore, incPlayerHeal, incHealAfter)
-	o.incHeal = floor(incHealBefore + incPlayerHeal + incHealAfter)
+local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
+	o.incHeal = incHealTotal
 	
 	if s.ShowHealth then
 		if o.incHeal > 0 then
-			o.NameText:SetText("+"..nUF.common.shortValue(o.incHeal, 1000))
+			o.NameText:SetFormattedText("+%s", nUF.common.shortValue(o.incHeal, 1000))
 			o.NameText:SetTextColor(.1, 1, .1)
 		else
 			updateName(o, "updateHeals", unit, o.eName, o.eServer, o.eClass, o.eLClass)
@@ -230,6 +238,17 @@ local updateHeals = function(o, event, unit, incHealBefore, incPlayerHeal, incHe
 	end
 	if o.eDisabled then return end
 	updateHealth(o, "updateHeals", unit, o.eHealth, o.eHealthMax)
+end
+
+local updateHealAssign = function(o, event, unit, isHealAssigned)
+	local _,_,_,a = o:GetBackdropColor()
+	o.isHealAssigned = isHealAssigned
+	if isHealAssigned then
+		o:SetBackdropColor(.7, .2, 1, a)
+	else
+		o:SetBackdropColor(0, 0, 0, a)
+	end
+	o:updateAuras(unit)
 end
 
 local updateInRange = function(o, event, unit, inRange)
@@ -266,6 +285,10 @@ do
 	elseif nUF.common.playerClass == "DRUID" then
 		dispelPrio.Magic = nil
 		dispelPrio.Disease = nil
+	elseif nUF.common.playerClass == "WARLOCK" then
+		dispelPrio.Curse = nil
+		dispelPrio.Poison = nil
+		dispelPrio.Disease = nil
 	end
 	local buffcolor = {r=0, g=0, b=0}
 	local cooldown_tables = { [2] = coolDowns.ALL }
@@ -273,7 +296,7 @@ do
 		
 		-- Priorized Debuffs
 		local debuff, icon
-		for i, debuffName in ipairs(prioDebuffs) do
+		for i, debuffName in next, prioDebuffs do
 			local name, _, texture, charges, debuffType, duration, expirationTime = UnitAura(o.unit, debuffName, nil, "HARMFUL")
 			if name then
 				setAura(o.Debuff, DebuffTypeColor[debuffType] or DebuffTypeColor.none, texture, charges, duration, expirationTime)
@@ -314,8 +337,12 @@ do
 		
 		updateMissingBuffs(o)
 		
+		if o.isHealAssigned then
+			setAura(o.CenterIcon, DebuffTypeColor.none, [[Interface\Icons\Spell_Frost_ColdHearted]], 1)
+		end
+		
 		-- Corners
-		for auraName, corner in pairs(o.Corners) do
+		for auraName, corner in next, o.Corners do
 			local name, _, _, charges, _, duration, expirationTime, caster = UnitAura(o.unit, auraName, nil, corner.debuff and "HARMFUL" or "HELPFUL")
 			if name and (corner.all or caster=="player") then
 				if duration and duration ~= 0 then
@@ -337,8 +364,8 @@ do
 		
 		-- Cooldown
 		cooldown_tables[1] = coolDowns[o.eClass]
-		for _, cds in pairs(cooldown_tables) do
-			for _, auraName in ipairs(cds) do
+		for _, cds in next, cooldown_tables do
+			for _, auraName in next, cds do
 				local name, _, texture, charges, _, duration, expirationTime = UnitAura(o.unit, auraName, nil, "HELPFUL")
 				if name then
 					return setAura(o.CoolDown, nil, texture, charges, duration, expirationTime)
@@ -351,9 +378,9 @@ do
 		if o.CenterIcon.prio == 0 then
 			if o.ePlayerCombat then return o.CenterIcon:Hide() end
 			
-			for texture, t in pairs(missingBuffs) do
+			for texture, t in next, missingBuffs do
 				local found = nil
-				for i, buffName in ipairs(t) do
+				for i, buffName in next, t do
 					if UnitAura(o.unit, buffName, nil, "HELPFUL") then
 						found = true
 						break
@@ -373,17 +400,10 @@ end
 -- FRAME STYLE + CREATION ------------------------------------------------------
 
 local onEnter = function(o, ...) if not o.ePlayerCombat then UnitFrame_OnEnter(o, ...) end end
-local onLeave = function(o, ...)
-	local _, unit = GameTooltip:GetUnit()
-	if not o.unit or not unit or unit == o.unit then
-		UnitFrame_OnLeave(o, ...)
-	end
-end
 local function style(o)
 	o:RegisterForClicks("anyup")
 	
 	o:SetScript("OnEnter", onEnter)
-	o:SetScript("OnLeave", UnitFrame_OnLeave)
 	
 	o:SetBackdrop(nUF.common.framebackdrop)
 	o:SetBackdropColor(0, 0, 0, 1)
@@ -437,7 +457,7 @@ local function style(o)
 	o.Debuff:SetPoint("BOTTOMRIGHT", o, "BOTTOMRIGHT", -1, 1)
 	
 	o.Corners = {}
-	for auraName, c in pairs(cornerSetup) do
+	for auraName, c in next, cornerSetup do
 		local corner = CreateFrame("Frame", nil, TEXT_ANCHOR)
 		corner:SetWidth(c.size)
 		corner:SetHeight(c.size)
@@ -466,6 +486,7 @@ local function style(o)
 		o.updateHealthFrequent = true
 	end
 	o.updateHealComm = updateHeals
+	o.updateHealAssign = updateHealAssign
 	o.incHeal = 0
 	o.updatePlayerCombat = updateMissingBuffs
 	o.updateThreat = nUF.common.updateThreat
@@ -474,6 +495,7 @@ local function style(o)
 	
 	o:SetAttribute("initial-width", s.FrameWidth)
 	o:SetAttribute("initial-height", s.FrameHeight)
+--	o:SetAttribute("toggleForVehicle", true)
 end
 
 local RaidGroup = {}

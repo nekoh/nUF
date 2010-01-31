@@ -1,6 +1,5 @@
---[[--
-	function:
-		.updateFaction(o, event, unit)
+﻿--[[--
+	.updateFaction(o, event, unit)
 --]]--
 function nUF:UNIT_FACTION(event, unit)
 	local o = nUF.objects[unit]

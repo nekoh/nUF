@@ -1,8 +1,6 @@
---[[--
-	function:
-		.updatePortrait(o, event, unit, powerType)
-	vars:
-		.ePowerType = UnitPowerType(unit)
+﻿--[[--
+	.updatePortrait(o, event, unit, powerType)
+	.ePowerType = UnitPowerType(unit)
 --]]--
 function nUF:UNIT_DISPLAYPOWER(event, unit)
 	local o = nUF.objects[unit]

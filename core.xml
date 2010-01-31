@@ -1,4 +1,4 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/">
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/">
 	<Script file="core.lua" />
 	
 	<Script file="elements\name.lua" />
@@ -17,6 +17,9 @@
 	<Script file="elements\resting.lua" />
 	<Script file="elements\threat.lua" />
 	
-	<Include file="libs\LibHealComm-3.0\lib.xml" />
+	<Script file="libs\LibStub\LibStub.lua" />
+	<Include file="libs\CallbackHandler-1.0\CallbackHandler-1.0.xml" />
+	<Include file="libs\LibHealComm-4.0\LibHealComm-4.0.xml" />
 	<Script file="elements\xhealcomm.lua" />
+	<Script file="elements\xhealassign.lua" />
 </Ui>

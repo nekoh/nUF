@@ -1,10 +1,10 @@
---------------------------------------------------------------------------------
+﻿--------------------------------------------------------------------------------
 -- SETTINGS --------------------------------------------------------------------
 
 local s = {
-	Position = {"BOTTOM", UIParent, "BOTTOM", 481, 320},
+	Position = {"BOTTOM", UIParent, "BOTTOM", 481, 328},
 	FrameWidth = 175,
-	HealthBarHeight = 16,
+	HealthBarHeight = 20,
 	PowerBarHeight = 3,
 	BarTexture = [[Interface\Tooltips\UI-Tooltip-Background]],
 	Font = GameFontNormal:GetFont(),
@@ -15,7 +15,7 @@ local classSettings = {
 
 -- override default settings with class settings if available
 if classSettings[nUF.common.playerClass] then
-	for k,v in pairs(classSettings[nUF.common.playerClass]) do
+	for k,v in next, classSettings[nUF.common.playerClass] do
 		s[k] = v
 	end
 end
@@ -54,8 +54,8 @@ local updateHealth = function(o, event, unit, curHP, maxHP, disabled, olddisable
 	o.HealthText:SetFormattedText("%.1f%%", curHP/maxHP*100.0)
 end 
 
-local updateHeals = function(o, event, unit, incHealBefore, incPlayerHeal, incHealAfter)
-	o.incHeal = floor(incHealBefore + incPlayerHeal + incHealAfter)
+local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
+	o.incHeal = incHealTotal
 	if o.eDisabled then return end
 	updateHealth(o, "updateHeals", unit, o.eHealth, o.eHealthMax)
 end
@@ -79,8 +79,8 @@ do
 		local i = 0
 		-- Cooldowns
 		cooldown_tables[1] = coolDowns[o.eClass]
-		for _, cds in pairs(cooldown_tables) do
-			for _, auraName in ipairs(cds) do
+		for _, cds in next, cooldown_tables do
+			for _, auraName in next, cds do
 				local name, _, texture, charges, _, duration, expirationTime = UnitAura(unit, auraName, nil, "HELPFUL")
 				if name then
 					i = i + 1
@@ -107,7 +107,6 @@ local function style(o)
 	o:SetAttribute("*type2", "menu")
 	
 	o:SetScript("OnEnter", UnitFrame_OnEnter)
-	o:SetScript("OnLeave", UnitFrame_OnLeave)
 	
 	o:SetBackdrop(nUF.common.framebackdrop)
 	o:SetBackdropColor(0, 0, 0, 1)

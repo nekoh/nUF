@@ -1,8 +1,6 @@
---[[--
-	function:
-		.updateComboPoints(o, event, unit, comboPoints)
-	vars:
-		.eComboPoints = GetComboPoints(unit, "target")
+﻿--[[--
+	.updateComboPoints(o, event, unit, comboPoints)
+	.eComboPoints = GetComboPoints(unit, "target")
 --]]--
 local objects = nUF.objects
 

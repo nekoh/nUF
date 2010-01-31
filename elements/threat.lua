@@ -1,8 +1,6 @@
---[[--
-	function:
-		.updateThreat(o, event, unit, newThreat, oldThreat)
-	vars:
-		.eThreat = UnitThreatSituation(unit)
+﻿--[[--
+	.updateThreat(o, event, unit, newThreat, oldThreat)
+	.eThreat = UnitThreatSituation(unit)
 --]]--
 local	UnitThreatSituation =
 		UnitThreatSituation

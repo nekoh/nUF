@@ -1,4 +1,4 @@
-nUF.common = {}
+﻿nUF.common = {}
 
 --------------------------------------------------------------------------------
 -- DATA ------------------------------------------------------------------------
@@ -61,8 +61,10 @@ do
 		DRUID = {
 			spellName(22812), -- Barkskin
 			spellName(61336), -- Survival Instincts
+			spellName(50334), -- Berserk
 		},
 		HUNTER = {
+			spellName(5384), -- Feign Death
 			spellName(19263), -- Deterrence
 		},
 		MAGE = {
@@ -73,6 +75,7 @@ do
 			spellName(642), -- Divine Shield
 		},
 		PRIEST = {
+			spellName(27827), -- Spirit of Redemption
 			spellName(47585), -- Dispersion
 		},
 		ROGUE = {
@@ -110,12 +113,12 @@ end
 -- nUF.common.aurabackdrop --
 do
 	nUF.common.framebackdrop = {
-		bgFile = [[Interface\Addons\nUF\media\white16x16]], tile = true, tileSize = 16,
-		edgeFile = [[Interface\Addons\nUF\media\white16x16]], edgeSize = 1,
+		bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 16,
+		edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1,
 		insets = {left = 1, right = 1, top = 1, bottom = 1},
 	}
 	nUF.common.aurabackdrop = {
-		bgFile = [[Interface\Addons\nUF\media\white16x16]], tile = true, tileSize = 16, edgeSize = 0,
+		bgFile = [[Interface\Buttons\WHITE8X8]], tile = true, tileSize = 16, edgeSize = 0,
 	}
 end
 
@@ -343,28 +346,25 @@ end
 -- nUF.common.updateCombatText --
 do
 	local maxalpha = 0.7
+	local show_time = COMBATFEEDBACK_FADEINTIME + COMBATFEEDBACK_HOLDTIME + COMBATFEEDBACK_FADEOUTTIME
 	local font = GameFontNormal:GetFont()
 	local texts = {}
 	local updateTime = 0
 	local combattextframe = CreateFrame("Frame")
 	combattextframe:SetScript("OnUpdate", function(self, elapsed)
 		updateTime = updateTime + elapsed
-		if updateTime < 0.05 then return end
-		updateTime = 0
-		
-		local now = GetTime()
-		for text, time in pairs(texts) do
-			local elapsedTime = now - time
-			if ( elapsedTime < (COMBATFEEDBACK_FADEINTIME + COMBATFEEDBACK_HOLDTIME) ) then
-				text:SetAlpha(maxalpha)
-			elseif ( elapsedTime < (COMBATFEEDBACK_FADEINTIME + COMBATFEEDBACK_HOLDTIME + COMBATFEEDBACK_FADEOUTTIME) ) then
-				local alpha = maxalpha - maxalpha*((elapsedTime - COMBATFEEDBACK_HOLDTIME - COMBATFEEDBACK_FADEINTIME) / COMBATFEEDBACK_FADEOUTTIME)
-				text:SetAlpha(alpha)
-			else
+		if updateTime < 0.1 then return end
+
+		for text, time in next, texts do
+			time = time - updateTime
+			if time < 0 then
 				text:Hide()
 				texts[text] = nil
-			end		
+			else
+				texts[text] = time
+			end
 		end
+		updateTime = 0
 		if not next(texts) then
 			self:Hide()
 		end
@@ -381,8 +381,7 @@ do
 					scale = .75
 				end
 				if UnitInParty( unit ) or UnitInRaid( unit ) then
-					g = 0
-					b = 0
+					g,b = 0,0
 				elseif type > 0 then
 					b = 0
 				end
@@ -395,9 +394,8 @@ do
 			end
 		elseif eventtype == "HEAL" then
 			text = "+"..amount
-			r = 0
-			b = 0
-			if ( flags == "CRITICAL" ) then
+			r,b = 0,0
+			if flags == "CRITICAL" then
 				scale = 1.3
 			end
 		elseif eventtype == "IMMUNE" or eventtype == "BLOCK" then
@@ -405,9 +403,7 @@ do
 			text = CombatFeedbackText[eventtype]
 		elseif eventtype == "ENERGIZE" then
 			text = amount
-			r = 0.41
-			g = 0.8
-			b = 0.94
+			r,g,b = .41,.8,.94
 			if flags == "CRITICAL" then
 				scale = 1.3
 			end
@@ -430,9 +426,9 @@ do
 		text1:SetFont(font, text1.size*scale, "OUTLINE")
 		text1:SetText(text)
 		text1:SetTextColor(r, g, b)
-		text1:SetAlpha(0.7)
+		text1:SetAlpha(maxalpha)
 		text1:Show()
-		texts[text1] = GetTime()
+		texts[text1] = show_time
 
 		combattextframe:Show()
 	end

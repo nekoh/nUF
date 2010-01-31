@@ -1,8 +1,6 @@
---[[--
-	function:
-		.updateInRange(o, event, unit, inRange)
-	vars:
-		.eInRange = UnitInRange(unit) or not UnitIsConnected(unit)
+﻿--[[--
+	.updateInRange(o, event, unit, inRange)
+	.eInRange = UnitInRange(unit) or not UnitIsConnected(unit)
 --]]--
 local	UnitInRange, IsSpellInRange, UnitIsConnected =
 		UnitInRange, IsSpellInRange, UnitIsConnected
@@ -22,7 +20,7 @@ updateFrame:SetScript("OnUpdate", function(f, elapsed)
 
 	if timer >= .5 then
 		timer = 0
-		for unit, o in pairs(nUF.objects) do
+		for unit, o in next, nUF.objects do
 			if o.updateInRange then
 				local inRange = UnitInRange(unit) or not UnitIsConnected(unit)
 				if inRange ~= o.eInRange then
