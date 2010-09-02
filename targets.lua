@@ -94,8 +94,6 @@ end
 -- FRAME STYLE + CREATION ------------------------------------------------------
 
 local function style(o)
-	o:RegisterForClicks("anyup")
-	
 	o:SetScript("OnEnter", function(...) if not UnitAffectingCombat("player") then UnitFrame_OnEnter(...) end end)
 	
 	o:SetBackdrop(nUF.common.framebackdrop)
@@ -173,3 +171,7 @@ if s.targettargettarget then
 	targettargettarget:SetHeight(s.HealthBarHeight+s.PowerBarHeight+5)
 	targettargettarget:SetPoint("BOTTOMRIGHT", "nUF_targettarget", "TOPRIGHT", 0, -1)
 end
+local focustarget = nUF:NewUnit("focustarget", style, "nUF_focustarget")
+focustarget:SetWidth(88)
+focustarget:SetHeight(s.HealthBarHeight+s.PowerBarHeight+5)
+focustarget:SetPoint("TOPRIGHT", "nUF_focus", "BOTTOMRIGHT", 0, -1)

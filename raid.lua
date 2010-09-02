@@ -3,7 +3,7 @@
 
 -- default settings
 local s = {
-	Position = {"TOPLEFT", UIParent, "TOPLEFT", 848, -589},
+	Position = {"TOPLEFT", UIParent, "BOTTOM", 142, 295},
 	FrameWidth = 60,
 	FrameHeight = 36,
 	FrameGap = 0,
@@ -14,7 +14,7 @@ local s = {
 	IconSize = 18,
 	IconBorderSize = 2,
 	IconAlpha = .7,
-	MaxGroup = 7,
+	MaxGroup = 5,
 }
 local classSettings = {
 	PRIEST = {
@@ -74,6 +74,18 @@ if nUF.common.playerClass == "PRIEST" then
 		size = 6,
 		color = { .8,.6,.3 },
 		anchor = "BOTTOMLEFT", x = 8, y = 1,
+	}
+	cornerSetup[GetSpellInfo(15359)] = { -- Inspiration
+		all = true,
+		size = 7,
+		color = { .6,.6,.6 },
+		anchor = "TOPLEFT", x = 16, y = -1,
+	}
+	cornerSetup[GetSpellInfo(16237)] = { -- Ancestral Fortitude
+		all = true,
+		size = 7,
+		color = { .6,.6,.6 },
+		anchor = "TOPLEFT", x = 16, y = -1,
 	}
 elseif nUF.common.playerClass == "DRUID" then
 	cornerSetup[GetSpellInfo(774)] = { -- Rejuvenation
@@ -136,7 +148,7 @@ local blackList = {
 	[GetSpellInfo(61248)] = true, -- Sartharion: Power of Tenebron
 	[GetSpellInfo(61251)] = true, -- Sartharion: Power of Vesperon
 	[GetSpellInfo(56438)] = true, -- Malygos: Arcane Overload
-	[GetSpellInfo(28679)] = true, -- Gothik the Harvester: Harvest Soul
+--	[GetSpellInfo(28679)] = true, -- Gothik the Harvester: Harvest Soul
 	[GetSpellInfo(28832)] = true, -- 4H: Mark of Korth'azz
 	[GetSpellInfo(28833)] = true, -- 4H: Mark of Blaumeux
 	[GetSpellInfo(28834)] = true, -- 4H: Mark of Rivendare
@@ -156,9 +168,16 @@ local blackList = {
 	[GetSpellInfo(67590)] = true, -- Twin Valkyr: Powering Up
 	[GetSpellInfo(66193)] = true, -- Anub'arak: Permafrost
 	[GetSpellInfo(67630)] = true, -- Anub'arak: Leeching Swarm
-	[GetSpellInfo(71328)] = true, -- Dungeon Cooldown
 	[GetSpellInfo(69127)] = true, -- ICC: Chill of the Throne
 	[GetSpellInfo(70867)] = true, -- Blood-Queen Lana'thel: Essence of the Blood Queen
+	[GetSpellInfo(69762)] = true, -- Sindragosa: Unchained Magic
+	[GetSpellInfo(70106)] = true, -- Sindragosa: Chilled to the Bone
+	[GetSpellInfo(69766)] = true, -- Sindragosa: Instability
+	[GetSpellInfo(72530)] = true, -- Sindragosa: Mystic Buffet
+	[GetSpellInfo(72769)] = true, -- Saurfang HC: Scent of Blood
+	[GetSpellInfo(70953)] = true, -- Putricide HC: Plague Sickness
+	[GetSpellInfo(70353)] = true, -- Putricide HC: Gas Variable
+	[GetSpellInfo(70352)] = true, -- Putricide HC: Ooze Variable
 }
 
 --------------------------------------------------------------------------------
@@ -193,6 +212,8 @@ do
 			o.HealthBar:SetAlpha(alpha)
 			o.HealBar:SetAlpha(alpha)
 			o.HealthBarBG:SetAlpha(alpha)
+			o.PowerBar:SetAlpha(alpha)
+			o.PowerBarBG:SetAlpha(alpha)
 			o.CenterIcon:SetAlpha(alpha)
 			
 			if disabled then
@@ -257,6 +278,11 @@ local updateInRange = function(o, event, unit, inRange)
 	else
 		o:SetAlpha(.4)
 	end
+end
+
+local updatePower = function(o, event, unit, curPP, maxPP)
+	o.PowerBar:SetMinMaxValues(0, maxPP)
+	o.PowerBar:SetValue(curPP)
 end
 
 local updateAuras, updateMissingBuffs
@@ -401,9 +427,8 @@ end
 
 local onEnter = function(o, ...) if not o.ePlayerCombat then UnitFrame_OnEnter(o, ...) end end
 local function style(o)
-	o:RegisterForClicks("anyup")
-	
 	o:SetScript("OnEnter", onEnter)
+	o:SetScript("OnLeave", UnitFrame_OnLeave)
 	
 	o:SetBackdrop(nUF.common.framebackdrop)
 	o:SetBackdropColor(0, 0, 0, 1)
@@ -412,7 +437,7 @@ local function style(o)
 	o.HealthBarBG = o:CreateTexture(nil, "BORDER")
 	o.HealthBarBG:SetTexture(s.BarTexture)
 	o.HealthBarBG:SetPoint("TOPLEFT", 2, -2)
-	o.HealthBarBG:SetPoint("BOTTOMRIGHT", -2, 2)
+	o.HealthBarBG:SetPoint("BOTTOMRIGHT", -2, 5)
 	
 	o.HealBar = CreateFrame("StatusBar", nil, o)
 	o.HealBar:SetStatusBarTexture(s.BarTexture)
@@ -423,6 +448,16 @@ local function style(o)
 	o.HealthBar:SetStatusBarTexture(s.BarTexture)
 	o.HealthBar:SetStatusBarColor(0, 0, 0, 0.7)
 	o.HealthBar:SetAllPoints(o.HealthBarBG)
+	
+	o.PowerBar = CreateFrame("StatusBar", nil, o)
+	o.PowerBar:SetStatusBarTexture(s.BarTexture)
+	o.PowerBar:SetPoint("TOPLEFT", o.HealthBar, "BOTTOMLEFT", 0, -1)
+	o.PowerBar:SetPoint("BOTTOMRIGHT", -2, 2)
+	
+	o.PowerBarBG = o.PowerBar:CreateTexture(nil, "BORDER")
+	o.PowerBarBG:SetTexture(s.BarTexture)
+	o.PowerBarBG:SetAllPoints(o.PowerBar)
+	o.PowerBarBG:SetAlpha(.25)
 	
 	local textheight = (s.FrameHeight-4)/2
 	local TEXT_ANCHOR = CreateFrame("Frame", nil, o)
@@ -444,6 +479,12 @@ local function style(o)
 	o.HealthText:SetWidth(s.FrameWidth-4)
 	o.HealthText:SetHeight(textheight)
 	o.HealthText:SetPoint("TOP", o, "CENTER")
+	
+	o.RaidTarget = TEXT_ANCHOR:CreateTexture(nil, "OVERLAY")
+	o.RaidTarget:SetWidth(10)
+	o.RaidTarget:SetHeight(10)
+	o.RaidTarget:SetTexture([[Interface\TargetingFrame\UI-RaidTargetingIcons]])
+	o.RaidTarget:SetPoint("CENTER", o, "TOP", 0, -3)
 	
 	o.CenterIcon = nUF.common.createAura(TEXT_ANCHOR, nil, nil, s.IconSize, nil, s.IconBorderSize)
 	o.CenterIcon:SetAlpha(s.IconAlpha)
@@ -488,6 +529,9 @@ local function style(o)
 	o.updateHealComm = updateHeals
 	o.updateHealAssign = updateHealAssign
 	o.incHeal = 0
+	o.updatePower = updatePower
+	o.updatePowerType = nUF.common.updatePowerType
+	o.updateRaidTarget = nUF.common.updateRaidTarget
 	o.updatePlayerCombat = updateMissingBuffs
 	o.updateThreat = nUF.common.updateThreat
 	o.updateInRange = updateInRange
@@ -501,8 +545,8 @@ end
 local RaidGroup = {}
 for i = 1, s.MaxGroup do
 	RaidGroup[i] = nUF:NewHeader(style, "nUF_Raid" .. i)
-	RaidGroup[i]:SetAttribute("showRaid", true)
 	RaidGroup[i]:SetAttribute("showParty", true)
+	RaidGroup[i]:SetAttribute("showRaid", true)
 	RaidGroup[i]:SetAttribute("groupFilter", tostring(i))
 	RaidGroup[i]:SetAttribute("yOffset", -s.FrameGap)
 	if i == 1 then
@@ -515,8 +559,8 @@ end
 
 if s.ShowPets then
 	local PetGroup = nUF:NewHeader(style, "nUF_Pets", true)
-	PetGroup:SetAttribute("showRaid", true)
 	PetGroup:SetAttribute("showParty", true)
+	PetGroup:SetAttribute("showRaid", true)
 	PetGroup:SetAttribute("groupFilter", "1,2,3,4,5")
 	PetGroup:SetAttribute("yOffset", -s.FrameGap)
 	PetGroup:SetAttribute("maxColumns", 5)

@@ -88,6 +88,10 @@ do
 		selfBuffs[spellIcon(467)] = {
 			spellName(467), -- Thorns
 		}
+	elseif nUF.common.playerClass == "HUNTER" then
+		selfBuffs[spellIcon(61846)] = {
+			spellName(61846), -- Aspect of the Dragonhawk
+		}
 	end
 	spellIcon, spellName = nil, nil
 	for icon, t in next, nUF.common.missingBuffs do
@@ -215,30 +219,25 @@ do
 	local createAura = nUF.common.createAura
 	local setAura = nUF.common.setAura
 	local getAura = nUF.common.getAura
-	local dispelPrio = {
-		Magic = 4,
-		Curse = 3,
-		Poison = 2,
-		Disease = 1,
-	}
+	local dispelPrio = {}
 	if nUF.common.playerClass == "PRIEST" then
-		dispelPrio.Curse = nil
-		dispelPrio.Poison = nil
+		dispelPrio.Magic = 4
+		dispelPrio.Disease = 1
 	elseif nUF.common.playerClass == "SHAMAN" then
-		dispelPrio.Magic = nil
+		dispelPrio.Curse = 3
+		dispelPrio.Poison = 2
+		dispelPrio.Disease = 1
 	elseif nUF.common.playerClass == "PALADIN" then
-		dispelPrio.Curse = nil
+		dispelPrio.Magic = 4
+		dispelPrio.Poison = 2
+		dispelPrio.Disease = 1
 	elseif nUF.common.playerClass == "MAGE" then
-		dispelPrio.Magic = nil
-		dispelPrio.Poison = nil
-		dispelPrio.Disease = nil
+		dispelPrio.Curse = 3
 	elseif nUF.common.playerClass == "DRUID" then
-		dispelPrio.Magic = nil
-		dispelPrio.Disease = nil
+		dispelPrio.Curse = 3
+		dispelPrio.Poison = 2
 	elseif nUF.common.playerClass == "WARLOCK" then
-		dispelPrio.Curse = nil
-		dispelPrio.Poison = nil
-		dispelPrio.Disease = nil
+		dispelPrio.Magic = 4
 	end
 	local size = s.HealthBarHeight+s.PowerBarHeight+3
 	local auras = {}
@@ -253,14 +252,20 @@ do
 			if name then
 				local debuff = debuffs[i]
 				if not debuff then
-					debuff = createAura(o, unit, i, size)
+					debuff = createAura(o, unit, i, 33, 11, 2)
 					debuff.filter = "HARMFUL"
-					if i == 1 then
-						debuff:SetPoint("TOPLEFT", o, "BOTTOMRIGHT", 1, -1)
-					else
+					if i ~= 1 then
 						debuff:SetPoint("LEFT", debuffs[i-1], "RIGHT", 1, 0)
 					end
 					debuffs[i] = debuff
+				end
+				if i == 1 then
+					debuff:ClearAllPoints()
+					if GetNumRaidMembers() > 4 then
+						debuff:SetPoint("TOPLEFT", o, "BOTTOMRIGHT", 3, -1)
+					else
+						debuff:SetPoint("BOTTOMLEFT", o, "BOTTOMRIGHT", 3, 1)
+					end
 				end
 				local c = DebuffTypeColor[debuffType] or DebuffTypeColor.none
 				setAura(debuff, c, texture, charges, duration, expirationTime)
@@ -268,7 +273,7 @@ do
 				local prio = dispelPrio[debuffType]
 				if prio and prio > lastprio then
 					lastprio = prio
-					dc = DebuffTypeColor[debuffType]
+					dc = c
 				end
 			elseif debuffs[i] then
 				debuffs[i]:Hide()
@@ -322,12 +327,9 @@ end
 
 local function style(o)
 	o.menu = function() ToggleDropDownMenu(1, nil, _G["PlayerFrameDropDown"], "cursor", 0, 0) end
-	o:RegisterForClicks("anyup")
 	o:SetAttribute("*type2", "menu")
 	
 	o:SetScript("OnEnter", function(...) if not o.ePlayerCombat then UnitFrame_OnEnter(...) end end)
-	
-	o:RegisterForClicks("anyup")
 	
 	o:SetBackdrop(nUF.common.framebackdrop)
 	o:SetBackdropColor(0, 0, 0, 1)
@@ -381,7 +383,7 @@ local function style(o)
 	o.RaidTarget:SetWidth(18)
 	o.RaidTarget:SetHeight(18)
 	o.RaidTarget:SetTexture([[Interface\TargetingFrame\UI-RaidTargetingIcons]])
-	o.RaidTarget:SetPoint("CENTER", o, "TOP", 0, -3)
+	o.RaidTarget:SetPoint("CENTER", o, "TOP", 20, -3)
 	
 	o.CombatText = TEXT_ANCHOR:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 	o.CombatText.size = 15

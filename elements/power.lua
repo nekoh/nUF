@@ -1,18 +1,18 @@
 ﻿--[[--
 	.updatePower(o, event, unit, curPP, maxPP)
-	.ePower = UnitMana(unit)
-	.ePowerMax = UnitManaMax(unit)
+	.ePower = UnitPower(unit)
+	.ePowerMax = UnitPowerMax(unit)
 --]]--
 local objects = nUF.objects
 
-local	UnitMana, UnitManaMax =
-		UnitMana, UnitManaMax
+local	UnitPower, UnitPowerMax =
+		UnitPower, UnitPowerMax
 
 function nUF:UNIT_MANA(event, unit)
 	local o = objects[unit]
 	if not o or not o.updatePower then return end
 	
-	o.ePower, o.ePowerMax = UnitMana(unit), UnitManaMax(unit) 
+	o.ePower, o.ePowerMax = UnitPower(unit), UnitPowerMax(unit) 
 	o:updatePower(event, unit, o.ePower, o.ePowerMax)
 end
 nUF.UNIT_MAXMANA = nUF.UNIT_MANA
@@ -43,10 +43,10 @@ table.insert(nUF.element_update, nUF.UNIT_MANA)
 local frequentUpdate = function(o, elapsed)
 	if o.eDisabled then return end
 	
-	local curPP = UnitMana(o.unit)
+	local curPP = UnitPower(o.unit)
 	if curPP ~= o.ePower then
 		o.ePower = curPP
-		if not o.ePowerMax then o.ePowerMax = UnitManaMax(o.unit) end
+		if not o.ePowerMax then o.ePowerMax = UnitPowerMax(o.unit) end
 		o:updatePower("FrequentUpdate", o.unit, curPP, o.ePowerMax)
 	end
 end

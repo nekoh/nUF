@@ -103,7 +103,6 @@ end
 
 local function style(o)
 	o.menu = function() ToggleDropDownMenu(1, nil, _G["TargetFrameDropDown"], "cursor", 0, 0) end
-	o:RegisterForClicks("anyup")
 	o:SetAttribute("*type2", "menu")
 	
 	o:SetScript("OnEnter", UnitFrame_OnEnter)

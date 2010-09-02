@@ -128,7 +128,6 @@ end
 
 local function style(o)
 	o.menu = function() ToggleDropDownMenu(1, nil, _G["PetFrameDropDown"], "cursor", 0, 0) end
-	o:RegisterForClicks("anyup")
 	o:SetAttribute("*type2", "menu")
 
 	o:SetScript("OnEnter", function(...) if not UnitAffectingCombat("player") then UnitFrame_OnEnter(...) end end)

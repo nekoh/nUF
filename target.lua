@@ -47,8 +47,6 @@ elseif nUF.common.playerClass == "PRIEST" then
 	
 	playerDebuffs[GetSpellInfo(589)] = 1 -- Shadow Word: Pain
 	playerDebuffs[GetSpellInfo(2944)] = 1 -- Devouring Plague
-	playerDebuffs[GetSpellInfo(15286)] = 1 -- Vampiric Embrace
-	playerDebuffs[GetSpellInfo(34914)] = 1 -- Vampiric Touch
 elseif nUF.common.playerClass == "WARLOCK" then
 	playerDebuffs[GetSpellInfo(17800)] = 2 -- Shadow Mastery
 	playerDebuffs[GetSpellInfo(22959)] = 2 -- Improved Scorch
@@ -59,6 +57,10 @@ elseif nUF.common.playerClass == "WARLOCK" then
 elseif nUF.common.playerClass == "DRUID" then
 	playerDebuffs[GetSpellInfo(5570)] = 1 -- Insect Swarm
 	playerDebuffs[GetSpellInfo(8921)] = 1 -- Moonfire
+elseif nUF.common.playerClass == "HUNTER" then
+	playerDebuffs[GetSpellInfo(1130)] = 2 -- Hunter's Mark
+	
+	playerDebuffs[GetSpellInfo(1978)] = 1 -- Serpent Sting
 end
 
 --------------------------------------------------------------------------------
@@ -193,8 +195,21 @@ do
 	local buffs, debuffs, iauras = {}, {}, {}
 	local auras_per_row = floor(s.FrameWidth/(size+1))
 	local buffcolor = {r=0, g=0, b=0}
+	local purgecolor = {r=.25, g=.5, b=.85}
+	local tranqcolor = {r=.66, g=.25, b=.25}
 	local last_lines = 0
 	local cooldown_tables = { [2] = coolDowns.ALL }
+	local purge = {}
+	if nUF.common.playerClass == "PRIEST" then
+		purge.Magic = purgecolor
+	elseif nUF.common.playerClass == "SHAMAN" then
+		purge.Magic = purgecolor
+	elseif nUF.common.playerClass == "HUNTER" then
+		purge.Magic = purgecolor
+		purge.Enrage = tranqcolor
+	elseif nUF.common.playerClass == "WARLOCK" then
+		purge.Magic = purgecolor
+	end
 	updateAuras = function(o, event, unit)
 		local count = 0
 		-- debuffs
@@ -223,9 +238,10 @@ do
 			end
 		end
 		
+		local hostile = UnitCanAttack("player", "target")
 		-- buffs
 		for i = 1, 32 do
-			local name, _, texture, charges, debuffType, duration, expirationTime = UnitAura(unit, i, "HELPFUL")
+			local name, _, texture, charges, buffType, duration, expirationTime, unitCaster, isStealable, shouldConsolidate = UnitAura(unit, i, "HELPFUL")
 			if name then
 				count = count + 1
 				local buff = buffs[i]
@@ -241,7 +257,7 @@ do
 					end
 					buffs[i] = buff
 				end
-				setAura(buff, nil, texture, charges, duration, expirationTime)
+				setAura(buff, hostile and purge[buffType] or buffcolor, texture, charges, duration, expirationTime, shouldConsolidate)
 			elseif buffs[i] then
 				buffs[i]:Hide()
 			else break
@@ -305,7 +321,6 @@ end
 
 local function style(o)
 	o.menu = function() ToggleDropDownMenu(1, nil, _G["TargetFrameDropDown"], "cursor", 0, 0) end
-	o:RegisterForClicks("anyup")
 	o:SetAttribute("*type2", "menu")
 	
 	o:SetScript("OnEnter", UnitFrame_OnEnter)

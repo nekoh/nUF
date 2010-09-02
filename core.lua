@@ -121,6 +121,7 @@ local initObject = function(o)
 
 	style(o)
 
+	o:RegisterForClicks("anydown")
 	o:SetAttribute("*type1", "target")
 	o:SetScript("OnAttributeChanged", onAttributeChanged)
 	o:SetScript("OnShow", onShow)

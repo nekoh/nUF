@@ -57,6 +57,7 @@ do
 			spellName(48707), -- Anti-Magic Shell
 			spellName(48792), -- Icebound Fortitude
 			spellName(49039), -- Lichborne
+			spellName(55233), -- Vampiric Blood
 		},
 		DRUID = {
 			spellName(22812), -- Barkskin
@@ -68,6 +69,7 @@ do
 			spellName(19263), -- Deterrence
 		},
 		MAGE = {
+			spellName(12042), -- Arcane Power
 			spellName(45438), -- Ice Block
 		},
 		PALADIN = {
@@ -157,7 +159,8 @@ do
 		
 		f.cd = CreateFrame("Cooldown", nil, f)
 		f.cd:SetReverse(true)
-		f.cd:SetAllPoints(f)
+		f.cd:SetPoint("TOPLEFT", borderSize, -borderSize)
+		f.cd:SetPoint("BOTTOMRIGHT", -borderSize, borderSize)
 		
 		if unit and id then
 			f.unit = unit
@@ -168,16 +171,17 @@ do
 		end
 		return f
 	end
-	nUF.common.setAura = function(aura, c, texture, charges, duration, expirationTime)
+	nUF.common.setAura = function(aura, c, texture, charges, duration, expirationTime, desaturated)
 		if c then aura:SetBackdropColor(c.r, c.g, c.b) end
 		aura.texture:SetTexture(texture)
+		--aura.texture:SetDesaturated(not not desaturated)
 		
 		if charges > 1 then
 			aura.charges:SetText(charges)
 		else
 			aura.charges:SetText()
 		end
-		if duration and duration ~= 0 then
+		if duration and duration ~= 0 and not desaturated then
 			aura.cd:SetCooldown(expirationTime-duration, duration)
 		else
 			aura.cd:Hide()
