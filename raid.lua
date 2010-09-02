@@ -50,12 +50,12 @@ if nUF.common.playerClass == "PRIEST" then
 		color = { 0,.8,0 },
 		anchor = "TOPLEFT", x = 1, y = -1,
 	}
-	cornerSetup[GetSpellInfo(552)] = { -- Abolish Disease
-		all = true,
-		size = 6,
-		color = { .4,.8,0 },
-		anchor = "TOPLEFT", x = 8, y = -1,
-	}
+--	cornerSetup[GetSpellInfo(552)] = { -- Abolish Disease TODO: CATA
+--		all = true,
+--		size = 6,
+--		color = { .4,.8,0 },
+--		anchor = "TOPLEFT", x = 8, y = -1,
+--	}
 	cornerSetup[GetSpellInfo(33076)] = { -- Prayer of Mending
 		all = true,
 		size = 6,
@@ -75,13 +75,13 @@ if nUF.common.playerClass == "PRIEST" then
 		color = { .8,.6,.3 },
 		anchor = "BOTTOMLEFT", x = 8, y = 1,
 	}
-	cornerSetup[GetSpellInfo(15359)] = { -- Inspiration
+	cornerSetup[GetSpellInfo(15357)] = { -- Inspiration
 		all = true,
 		size = 7,
 		color = { .6,.6,.6 },
 		anchor = "TOPLEFT", x = 16, y = -1,
 	}
-	cornerSetup[GetSpellInfo(16237)] = { -- Ancestral Fortitude
+	cornerSetup[GetSpellInfo(16236)] = { -- Ancestral Fortitude
 		all = true,
 		size = 7,
 		color = { .6,.6,.6 },

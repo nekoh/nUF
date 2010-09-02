@@ -9,15 +9,8 @@ local s = {
 	BarTexture = [[Interface\Tooltips\UI-Tooltip-Background]],
 	Font = GameFontNormal:GetFont(),
 	FontSize = 9,
-	FiveSecondRule = nil,
 }
 local classSettings = {
-	PRIEST = {
-		FiveSecondRule = true,
-	},
-	DRUID = {
-		FiveSecondRule = true,
-	},
 }
 
 -- override default settings with class settings if available
@@ -36,12 +29,12 @@ if nUF.common.playerClass == "MAGE" then
 	playerProccs[GetSpellInfo(48108)] = "HELPFUL" -- Hot Streak
 elseif nUF.common.playerClass == "PRIEST" then
 	playerProccs[GetSpellInfo(33151)] = "HELPFUL" -- Surge of Light
-	playerProccs[GetSpellInfo(34754)] = "HELPFUL" -- Holy Concentration
+--	playerProccs[GetSpellInfo(34754)] = "HELPFUL" -- Holy Concentration TODO: CATA
 	playerProccs[GetSpellInfo(63731)] = "HELPFUL" -- Serendipity
 	playerProccs[GetSpellInfo(52795)] = "HELPFUL" -- Borrowed Time
 	playerProccs[GetSpellInfo(17)] = "HELPFUL" -- Power Word: Shield
 	playerProccs[GetSpellInfo(33076)] = "HELPFUL" -- Prayer of Mending
-	playerProccs[GetSpellInfo(552)] = "HELPFUL" -- Ablish Disease
+--	playerProccs[GetSpellInfo(552)] = "HELPFUL" -- Ablish Disease TODO: CATA
 	playerProccs[GetSpellInfo(139)] = "HELPFUL|PLAYER" -- Renew
 elseif nUF.common.playerClass == "DRUID" then
 	playerProccs[GetSpellInfo(16870)] = "HELPFUL" -- Clearcasting
@@ -157,20 +150,7 @@ end
 
 local updatePower
 do
-	local lastPP = 0
 	updatePower = function(o, event, unit, curPP, maxPP)
-		if o.FiveSecondRuleBar and o.FiveSecondRuleBar.lastSpellTime then
-			if curPP < lastPP then
-				local elapsed = GetTime() - o.FiveSecondRuleBar.lastSpellTime
-				if elapsed < .5 then
-					o.FiveSecondRuleBar.timer = elapsed
-					o.FiveSecondRuleBar:Show()
-				end
-			end
-			o.FiveSecondRuleBar.lastSpellTime = nil
-		end
-		lastPP = curPP
-		
 		o.PowerBar:SetMinMaxValues(0, maxPP)
 		o.PowerBar:SetValue(curPP)
 		
@@ -407,32 +387,6 @@ local function style(o)
 		else
 			o.ComboPoint[i]:SetPoint("LEFT", o.ComboPoint[i-1], "RIGHT", 1, 0)
 		end
-	end
-	
-	if s.FiveSecondRule then
-		o.FiveSecondRuleBar = CreateFrame("StatusBar", nil, o.PowerBar)
-		o.FiveSecondRuleBar:SetStatusBarTexture(s.BarTexture)
-		o.FiveSecondRuleBar:SetStatusBarColor(1, 1, 1)
-		o.FiveSecondRuleBar:SetMinMaxValues(0, 500)
-		o.FiveSecondRuleBar:SetPoint("TOPLEFT", o.PowerBar, "BOTTOMLEFT", 0, 0)
-		o.FiveSecondRuleBar:SetPoint("TOPRIGHT", o.PowerBar, "BOTTOMRIGHT", 0, 0)
-		o.FiveSecondRuleBar:SetHeight(1)
-		o.FiveSecondRuleBar:Hide()
-		o.FiveSecondRuleBar:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-		o.FiveSecondRuleBar:SetScript("OnEvent", function(bar, event, unit)
-			if unit == "player" then
-				bar.lastSpellTime = GetTime()
-			end
-		end)
-		o.FiveSecondRuleBar.timer = 0
-		o.FiveSecondRuleBar:SetScript("OnUpdate", function(bar, elapsed)
-			bar.timer = bar.timer + elapsed
-			if bar.timer < 5 then
-				bar:SetValue(bar.timer * 100)
-			else
-				bar:Hide()
-			end
-		end)
 	end
 	
 	o:SetNormalTexture(1 ,1 , 1, 0)

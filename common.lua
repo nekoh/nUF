@@ -20,24 +20,18 @@ do
 	nUF.common.missingBuffs = {}
 	if nUF.common.playerClass == "PRIEST" then
 		nUF.common.missingBuffs[spellIcon(21562)] = {
-			spellName(21562), -- Prayer of Fortitude
-			spellName(1243), -- Power Word: Fortitude
+			spellName(21562), -- Power Word: Fortitude
 		}
-		nUF.common.missingBuffs[spellIcon(27681)] = {
-			spellName(27681), -- Prayer of Spirit
-			spellName(14752), -- Divine Spirit
+		nUF.common.missingBuffs[spellIcon(27683)] = {
+			spellName(27683), -- Shadow Protection
 		}
 	elseif nUF.common.playerClass == "MAGE" then
-		nUF.common.missingBuffs[spellIcon(23028)] = {
-			spellName(23028), -- Arcane Brilliance
-			spellName(61316), -- Dalaran Brilliance
+		nUF.common.missingBuffs[spellIcon(1459)] = {
 			spellName(1459), -- Arcane Intellect
-			spellName(61024), -- Dalaran Intellect
-			spellName(46302), -- K'iru's Song of Victory
+			spellName(61316), -- Dalaran Brilliance
 		}
 	elseif nUF.common.playerClass == "DRUID" then
-		nUF.common.missingBuffs[spellIcon(21849)] = {
-			spellName(21849), -- Gift of the Wild
+		nUF.common.missingBuffs[spellIcon(1126)] = {
 			spellName(1126), -- Mark of the Wild
 		}
 	end

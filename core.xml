@@ -5,6 +5,7 @@
 	<Script file="elements\faction.lua" />
 	<Script file="elements\level.lua" />
 	<Script file="elements\powertype.lua" />
+	<Script file="elements\healprediction.lua" />
 	<Script file="elements\health.lua" />
 	<Script file="elements\power.lua" />
 	<Script file="elements\combat.lua" />
@@ -17,9 +18,5 @@
 	<Script file="elements\resting.lua" />
 	<Script file="elements\threat.lua" />
 	
-	<Script file="libs\LibStub\LibStub.lua" />
-	<Include file="libs\CallbackHandler-1.0\CallbackHandler-1.0.xml" />
-	<Include file="libs\LibHealComm-4.0\LibHealComm-4.0.xml" />
-	<Script file="elements\xhealcomm.lua" />
 	<Script file="elements\xhealassign.lua" />
 </Ui>

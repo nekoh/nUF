@@ -25,7 +25,7 @@ local playerBuffs = {}
 if nUF.common.playerClass == "PRIEST" then
 	playerBuffs[GetSpellInfo(17)] = 2 -- Power Word: Shield
 	playerBuffs[GetSpellInfo(33076)] = 2 -- Prayer of Mending
-	playerBuffs[GetSpellInfo(552)] = 2 -- Ablish Disease
+--	playerBuffs[GetSpellInfo(552)] = 2 -- Ablish Disease TODO: CATA
 	playerBuffs[GetSpellInfo(139)] = 1 -- Renew
 elseif nUF.common.playerClass == "DRUID" then
 	playerBuffs[GetSpellInfo(2893)] = 2 -- Ablish Poison
