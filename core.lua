@@ -122,13 +122,15 @@ local initObject = function(o)
 	style(o)
 
 	o:RegisterForClicks("anydown")
-	o:SetAttribute("*type1", "target")
+--	o:SetAttribute("*type1", "target")
 	o:SetScript("OnAttributeChanged", onAttributeChanged)
 	o:SetScript("OnShow", onShow)
 	o:SetScript("OnHide", onHide)
 
 	o:SetScript("OnEvent", updateElements)
 	o:RegisterEvent("PLAYER_ENTERING_WORLD")
+	o:RegisterEvent("PARTY_MEMBERS_CHANGED")
+	o:RegisterEvent("RAID_ROSTER_UPDATE")
 
 	for f, v in next, nUF.element_init do
 		f(o)
@@ -172,18 +174,48 @@ function nUF:NewUnit(unit, style, name)
 	return o
 end
 
-function nUF:NewHeader(style, name, isPet)
+function nUF:NewHeader(style, name, isPet, width, height)
 	local template
 	if isPet then
 		template = "SecureGroupPetHeaderTemplate"
+		
 	else
 		disableBlizzard("party")
 		template = "SecureGroupHeaderTemplate"
 	end
 	local header = CreateFrame("Frame", name, UIParent, template)
 	header:SetAttribute("template", "SecureUnitButtonTemplate")
-	header.initialConfigFunction = initObject
+	if isPet then
+		header:SetAttribute("unitsuffix", "pet")
+	end
 	header.style = style
+--	header:SetAttribute("initialConfigFunction", initObject)
+	function header:nUF_InitialConfigFunction(...)
+		initObject(self[#self])
+	end
+	header:SetAttribute("initialConfigFunction", ([[
+		RegisterUnitWatch(self)
+
+		self:SetAttribute("*type1", "target")
+
+		--self:SetAttribute("toggleForVehicle", true)
+		self:SetWidth(%d)
+		self:SetHeight(%d)
+
+		local header = self:GetParent()
+
+		if header:GetAttribute("unitsuffix") == "pet" then
+			self:SetAttribute("unitsuffix", "pet")
+		end
+
+		local clickcast_header = header:GetFrameRef("clickcast_header")
+		if clickcast_header then
+			clickcast_header:SetAttribute("clickcast_button", self)
+			clickcast_header:RunAttribute("clickcast_register")
+		end
+
+		header:CallMethod("nUF_InitialConfigFunction")
+	]]):format(width, height))
 	
 	return header
 end
@@ -191,8 +223,8 @@ end
 function nUF:Integrity()
 	for unit,o in next, nUF.objects do
 		local name, server = UnitName(unit)
-		if name ~= o.eName or server ~= o.eServer then
-			printf("%s-%s ~=? %s-%s", name, server or 'nil', o.eName, o.eServer)
+		if unit ~= o.unit or name ~= o.eName or server ~= o.eServer then
+			printf(format("[%s] %s-%s ~=? [%s] %s-%s", unit, name, server or 'nil', o.unit, o.eName, o.eServer or 'nil'))
 		end
 	end
 end

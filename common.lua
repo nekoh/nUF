@@ -21,6 +21,7 @@ do
 	if nUF.common.playerClass == "PRIEST" then
 		nUF.common.missingBuffs[spellIcon(21562)] = {
 			spellName(21562), -- Power Word: Fortitude
+			spellName(6307), -- Blood Pact
 		}
 		nUF.common.missingBuffs[spellIcon(27683)] = {
 			spellName(27683), -- Shadow Protection
@@ -45,7 +46,6 @@ do
 			spellName(1022), -- Hand of Protection
 			spellName(1044), -- Hand of Freedom
 			spellName(1038), -- Hand of Salvation
-			spellName(19752), -- Divine Intervention
 		},
 		DEATHKNIGHT = {
 			spellName(48707), -- Anti-Magic Shell

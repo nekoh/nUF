@@ -54,8 +54,8 @@ local updateHealth = function(o, event, unit, curHP, maxHP, disabled, olddisable
 	o.HealthText:SetFormattedText("%.1f%%", curHP/maxHP*100.0)
 end 
 
-local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
-	o.incHeal = incHealTotal
+local updateHeals = function(o, event, unit)
+	o.incHeal = UnitGetIncomingHeals(unit) or 0
 	if o.eDisabled then return end
 	updateHealth(o, "updateHeals", unit, o.eHealth, o.eHealthMax)
 end
@@ -173,7 +173,7 @@ local function style(o)
 	o.updateFaction = nUF.common.updateTypeColor
 	o.updatePortrait = nUF.common.updatePortrait
 	o.updateHealth = updateHealth
-	o.updateHealComm = updateHeals
+	o.updateHealPrediction = updateHeals
 	o.incHeal = 0
 	o.updatePower = updatePower
 	o.updatePowerType = nUF.common.updatePowerType

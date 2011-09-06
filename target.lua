@@ -25,10 +25,8 @@ local playerBuffs = {}
 if nUF.common.playerClass == "PRIEST" then
 	playerBuffs[GetSpellInfo(17)] = 2 -- Power Word: Shield
 	playerBuffs[GetSpellInfo(33076)] = 2 -- Prayer of Mending
---	playerBuffs[GetSpellInfo(552)] = 2 -- Ablish Disease TODO: CATA
 	playerBuffs[GetSpellInfo(139)] = 1 -- Renew
 elseif nUF.common.playerClass == "DRUID" then
-	playerBuffs[GetSpellInfo(2893)] = 2 -- Ablish Poison
 	playerBuffs[GetSpellInfo(774)] = 1 -- Rejuvenation
 	playerBuffs[GetSpellInfo(33763)] = 1 -- Lifebloom
 	playerBuffs[GetSpellInfo(8936)] = 1 -- Regrowth
@@ -53,7 +51,8 @@ elseif nUF.common.playerClass == "WARLOCK" then
 	playerDebuffs[GetSpellInfo(12579)] = 2 -- Winter's Chill
 	playerDebuffs[GetSpellInfo(1490)] = 2 -- Curse of Elements
 	playerDebuffs[GetSpellInfo(60433)] = 2 -- Earth and Moon
-	playerDebuffs[GetSpellInfo(51735)] = 2 -- Ebon Plague
+	playerDebuffs[GetSpellInfo(65142)] = 2 -- Ebon Plague
+	-- TODO : CATA add jinx
 elseif nUF.common.playerClass == "DRUID" then
 	playerDebuffs[GetSpellInfo(5570)] = 1 -- Insect Swarm
 	playerDebuffs[GetSpellInfo(8921)] = 1 -- Moonfire
@@ -137,19 +136,6 @@ do
 		o.HealBar:SetMinMaxValues(0, maxHP)
 		o.HealBar:SetValue(curHP+o.incHeal)
 		
-		if o.incPlayerHeal > 0 then
-			local barwidth = o.HealthBar:GetWidth()
-			local modifier = barwidth / maxHP
-			local pos = min((curHP + o.incHealBefore) * modifier, barwidth)
-			local width = o.incPlayerHeal * modifier
-			o.MyHealBar:ClearAllPoints()
-			o.MyHealBar:SetPoint("LEFT", o.HealthBar, "LEFT", pos, 0)
-			o.MyHealBar:SetWidth(width)
-			o.MyHealBar:Show()
-		else
-			o.MyHealBar:Hide()
-		end
-		
 		if UnitCanAttack("player", unit) then
 			o.HealthText:SetFormattedText("%s / %s  %.1f", shortValue(curHP), shortValue(maxHP), curHP/maxHP*100)
 		else
@@ -159,11 +145,8 @@ do
 	end
 end
 
-local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
-	o.incHeal = incHealTotal
-	
-	o.incHealBefore = incHealBefore
-	o.incPlayerHeal = incHealPlayer
+local updateHeals = function(o, event, unit)
+	o.incHeal = UnitGetIncomingHeals(unit) or 0
 	if o.incHeal > 0 then
 		o.HealText:SetFormattedText("+%s", nUF.common.shortValue(o.incHeal))
 	else
@@ -422,8 +405,8 @@ local function style(o)
 	o.updatePortrait = nUF.common.updatePortrait
 	o.updateHealth = updateHealth
 	o.updateHealthFrequent = true
-	o.updateHealComm = updateHeals
-	o.incHeal, o.incPlayerHeal = 0, 0
+	o.updateHealPrediction = updateHeals
+	o.incHeal = 0
 	o.updatePower = updatePower
 	o.updatePowerFrequent = true
 	o.updatePowerType = nUF.common.updatePowerType

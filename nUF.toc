@@ -1,9 +1,9 @@
-﻿## Interface: 30300
+﻿## Interface: 40200
 ## Title: |cff4080d9n|rUnitFrames
 
 ## Notes: A unit frame replacement.
 ## Author: nekoh
-## Version: 1.1
+## Version: 1.2
 
 ## OptionalDeps: LibHealComm-4.0
 

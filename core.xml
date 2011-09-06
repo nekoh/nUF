@@ -5,8 +5,8 @@
 	<Script file="elements\faction.lua" />
 	<Script file="elements\level.lua" />
 	<Script file="elements\powertype.lua" />
-	<Script file="elements\healprediction.lua" />
 	<Script file="elements\health.lua" />
+	<Script file="elements\healprediction.lua" />
 	<Script file="elements\power.lua" />
 	<Script file="elements\combat.lua" />
 	<Script file="elements\aura.lua" />

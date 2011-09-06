@@ -36,10 +36,11 @@ function nUF:UNIT_HEALTH(event, unit)
 	o:updateHealth(event, unit, o.eHealth, o.eHealthMax, o.eDisabled, oldDisabled)
 end
 nUF.UNIT_MAXHEALTH = nUF.UNIT_HEALTH
-
+nUF.UNIT_CONNECTION = nUF.UNIT_HEALTH
 -- element activation
 nUF:RegisterEvent("UNIT_HEALTH")
 nUF:RegisterEvent("UNIT_MAXHEALTH")
+nUF:RegisterEvent("UNIT_CONNECTION")
 
 table.insert(nUF.element_update, nUF.UNIT_HEALTH)
 

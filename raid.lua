@@ -15,6 +15,7 @@ local s = {
 	IconBorderSize = 2,
 	IconAlpha = .7,
 	MaxGroup = 5,
+	PowerBar = false,
 }
 local classSettings = {
 	PRIEST = {
@@ -103,12 +104,6 @@ elseif nUF.common.playerClass == "DRUID" then
 		size = 8,
 		color = { .4,.8,0 },
 		anchor = "TOPLEFT", x = 1, y = -17,
-	}
-	cornerSetup[GetSpellInfo(2893)] = { -- Abolish Poison
-		all = true,
-		size = 6,
-		color = { 0,1,0 },
-		anchor = "TOPLEFT", x = 8, y = -1,
 	}
 	cornerSetup[GetSpellInfo(48438)] = { -- Wild Growth
 		size = 6,
@@ -212,8 +207,10 @@ do
 			o.HealthBar:SetAlpha(alpha)
 			o.HealBar:SetAlpha(alpha)
 			o.HealthBarBG:SetAlpha(alpha)
-			o.PowerBar:SetAlpha(alpha)
-			o.PowerBarBG:SetAlpha(alpha)
+			if s.PowerBar then
+				o.PowerBar:SetAlpha(alpha)
+				o.PowerBarBG:SetAlpha(alpha)
+			end
 			o.CenterIcon:SetAlpha(alpha)
 			
 			if disabled then
@@ -247,7 +244,7 @@ do
 end
 
 local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
-	o.incHeal = incHealTotal
+	o.incHeal = UnitGetIncomingHeals(unit) or 0
 	
 	if s.ShowHealth then
 		if o.incHeal > 0 then
@@ -437,7 +434,11 @@ local function style(o)
 	o.HealthBarBG = o:CreateTexture(nil, "BORDER")
 	o.HealthBarBG:SetTexture(s.BarTexture)
 	o.HealthBarBG:SetPoint("TOPLEFT", 2, -2)
-	o.HealthBarBG:SetPoint("BOTTOMRIGHT", -2, 5)
+	if s.PowerBar then
+		o.HealthBarBG:SetPoint("BOTTOMRIGHT", -2, 5)
+	else
+		o.HealthBarBG:SetPoint("BOTTOMRIGHT", -2, 2)
+	end
 	
 	o.HealBar = CreateFrame("StatusBar", nil, o)
 	o.HealBar:SetStatusBarTexture(s.BarTexture)
@@ -449,15 +450,17 @@ local function style(o)
 	o.HealthBar:SetStatusBarColor(0, 0, 0, 0.7)
 	o.HealthBar:SetAllPoints(o.HealthBarBG)
 	
-	o.PowerBar = CreateFrame("StatusBar", nil, o)
-	o.PowerBar:SetStatusBarTexture(s.BarTexture)
-	o.PowerBar:SetPoint("TOPLEFT", o.HealthBar, "BOTTOMLEFT", 0, -1)
-	o.PowerBar:SetPoint("BOTTOMRIGHT", -2, 2)
-	
-	o.PowerBarBG = o.PowerBar:CreateTexture(nil, "BORDER")
-	o.PowerBarBG:SetTexture(s.BarTexture)
-	o.PowerBarBG:SetAllPoints(o.PowerBar)
-	o.PowerBarBG:SetAlpha(.25)
+	if s.PowerBar then
+		o.PowerBar = CreateFrame("StatusBar", nil, o)
+		o.PowerBar:SetStatusBarTexture(s.BarTexture)
+		o.PowerBar:SetPoint("TOPLEFT", o.HealthBar, "BOTTOMLEFT", 0, -1)
+		o.PowerBar:SetPoint("BOTTOMRIGHT", -2, 2)
+		
+		o.PowerBarBG = o.PowerBar:CreateTexture(nil, "BORDER")
+		o.PowerBarBG:SetTexture(s.BarTexture)
+		o.PowerBarBG:SetAllPoints(o.PowerBar)
+		o.PowerBarBG:SetAlpha(.25)
+	end
 	
 	local textheight = (s.FrameHeight-4)/2
 	local TEXT_ANCHOR = CreateFrame("Frame", nil, o)
@@ -526,27 +529,31 @@ local function style(o)
 	if s.FrequentHealth then
 		o.updateHealthFrequent = true
 	end
-	o.updateHealComm = updateHeals
+	o.updateHealPrediction = updateHeals
 	o.updateHealAssign = updateHealAssign
 	o.incHeal = 0
-	o.updatePower = updatePower
-	o.updatePowerType = nUF.common.updatePowerType
+	if s.PowerBar then
+		o.updatePower = updatePower
+		o.updatePowerType = nUF.common.updatePowerType
+	end
 	o.updateRaidTarget = nUF.common.updateRaidTarget
 	o.updatePlayerCombat = updateMissingBuffs
 	o.updateThreat = nUF.common.updateThreat
 	o.updateInRange = updateInRange
 	o.updateAuras = updateAuras
 	
-	o:SetAttribute("initial-width", s.FrameWidth)
-	o:SetAttribute("initial-height", s.FrameHeight)
+--	o:SetAttribute("initial-width", s.FrameWidth)
+--	o:SetAttribute("initial-height", s.FrameHeight)
 --	o:SetAttribute("toggleForVehicle", true)
 end
 
 local RaidGroup = {}
 for i = 1, s.MaxGroup do
-	RaidGroup[i] = nUF:NewHeader(style, "nUF_Raid" .. i)
+	RaidGroup[i] = nUF:NewHeader(style, "nUF_Raid" .. i, nil, s.FrameWidth, s.FrameHeight)
 	RaidGroup[i]:SetAttribute("showParty", true)
 	RaidGroup[i]:SetAttribute("showRaid", true)
+	RaidGroup[i]:SetAttribute("initial-width", s.FrameWidth)
+	RaidGroup[i]:SetAttribute("initial-height", s.FrameHeight)
 	RaidGroup[i]:SetAttribute("groupFilter", tostring(i))
 	RaidGroup[i]:SetAttribute("yOffset", -s.FrameGap)
 	if i == 1 then
@@ -558,7 +565,7 @@ for i = 1, s.MaxGroup do
 end
 
 if s.ShowPets then
-	local PetGroup = nUF:NewHeader(style, "nUF_Pets", true)
+	local PetGroup = nUF:NewHeader(style, "nUF_Pets", true, s.FrameWidth, s.FrameHeight)
 	PetGroup:SetAttribute("showParty", true)
 	PetGroup:SetAttribute("showRaid", true)
 	PetGroup:SetAttribute("groupFilter", "1,2,3,4,5")

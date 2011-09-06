@@ -8,36 +8,20 @@ local objects = nUF.objects
 local	UnitPower, UnitPowerMax =
 		UnitPower, UnitPowerMax
 
-function nUF:UNIT_MANA(event, unit)
+function nUF:UNIT_POWER(event, unit)
 	local o = objects[unit]
 	if not o or not o.updatePower then return end
 	
 	o.ePower, o.ePowerMax = UnitPower(unit), UnitPowerMax(unit) 
 	o:updatePower(event, unit, o.ePower, o.ePowerMax)
 end
-nUF.UNIT_MAXMANA = nUF.UNIT_MANA
-nUF.UNIT_RAGE = nUF.UNIT_MANA
-nUF.UNIT_MAXRAGE = nUF.UNIT_MANA
-nUF.UNIT_FOCUS = nUF.UNIT_MANA
-nUF.UNIT_MAXFOCUS = nUF.UNIT_MANA
-nUF.UNIT_ENERGY = nUF.UNIT_MANA
-nUF.UNIT_MAXENERGY = nUF.UNIT_MANA
-nUF.UNIT_RUNIC_POWER = nUF.UNIT_MANA
-nUF.UNIT_MAXRUNIC_POWER = nUF.UNIT_MANA
+nUF.UNIT_MAXPOWER = nUF.UNIT_POWER
 
 -- element activation
-nUF:RegisterEvent("UNIT_MANA")
-nUF:RegisterEvent("UNIT_MAXMANA")
-nUF:RegisterEvent("UNIT_RAGE")
-nUF:RegisterEvent("UNIT_MAXRAGE")
-nUF:RegisterEvent("UNIT_FOCUS")
-nUF:RegisterEvent("UNIT_MAXFOCUS")
-nUF:RegisterEvent("UNIT_ENERGY")
-nUF:RegisterEvent("UNIT_MAXENERGY")
-nUF:RegisterEvent("UNIT_RUNIC_POWER")
-nUF:RegisterEvent("UNIT_MAXRUNIC_POWER")
+nUF:RegisterEvent("UNIT_POWER")
+nUF:RegisterEvent("UNIT_MAXPOWER")
 
-table.insert(nUF.element_update, nUF.UNIT_MANA)
+table.insert(nUF.element_update, nUF.UNIT_POWER)
 
 -- frequentUpdates
 local frequentUpdate = function(o, elapsed)

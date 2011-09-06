@@ -25,16 +25,15 @@ local playerProccs = {
 	[GetSpellInfo(62659)] = "HARMFUL", -- Ulduar:General Vezax: Shadow Crash
 }
 if nUF.common.playerClass == "MAGE" then
-	playerProccs[GetSpellInfo(44401)] = "HELPFUL" -- Missile Barrage
-	playerProccs[GetSpellInfo(48108)] = "HELPFUL" -- Hot Streak
+--	playerProccs[GetSpellInfo(44401)] = "HELPFUL" -- Missile Barrage TODO CATA
+--	playerProccs[GetSpellInfo(48108)] = "HELPFUL" -- Hot Streak TODO CATA
 elseif nUF.common.playerClass == "PRIEST" then
-	playerProccs[GetSpellInfo(33151)] = "HELPFUL" -- Surge of Light
+--	playerProccs[GetSpellInfo(33151)] = "HELPFUL" -- Surge of Light TODO: gone
 --	playerProccs[GetSpellInfo(34754)] = "HELPFUL" -- Holy Concentration TODO: CATA
 	playerProccs[GetSpellInfo(63731)] = "HELPFUL" -- Serendipity
 	playerProccs[GetSpellInfo(52795)] = "HELPFUL" -- Borrowed Time
 	playerProccs[GetSpellInfo(17)] = "HELPFUL" -- Power Word: Shield
 	playerProccs[GetSpellInfo(33076)] = "HELPFUL" -- Prayer of Mending
---	playerProccs[GetSpellInfo(552)] = "HELPFUL" -- Ablish Disease TODO: CATA
 	playerProccs[GetSpellInfo(139)] = "HELPFUL|PLAYER" -- Renew
 elseif nUF.common.playerClass == "DRUID" then
 	playerProccs[GetSpellInfo(16870)] = "HELPFUL" -- Clearcasting
@@ -60,7 +59,8 @@ do
 	end
 	if nUF.common.playerClass == "PRIEST" then
 		selfBuffs[spellIcon(588)] = {
-			spellName(588) -- Inner Fire
+			spellName(588), -- Inner Fire
+			spellName(73413), -- Inner Will
 		}
 	elseif nUF.common.playerClass == "MAGE" then
 		selfBuffs[spellIcon(30482)] = {
@@ -82,8 +82,8 @@ do
 			spellName(467), -- Thorns
 		}
 	elseif nUF.common.playerClass == "HUNTER" then
-		selfBuffs[spellIcon(61846)] = {
-			spellName(61846), -- Aspect of the Dragonhawk
+		selfBuffs[spellIcon(13165)] = {
+			spellName(13165), -- Aspect of the Hawk
 		}
 	end
 	spellIcon, spellName = nil, nil
@@ -142,8 +142,8 @@ do
 	end
 end
 
-local updateHeals = function(o, event, unit, incHealTotal, incHealPlayer, incHealBefore)
-	o.incHeal = incHealTotal
+local updateHeals = function(o, event, unit)
+	o.incHeal = UnitGetIncomingHeals(unit) or 0
 	if o.eDisabled then return end
 	updateHealth(o, "updateHeals", unit, o.eHealth, o.eHealthMax)
 end
@@ -396,7 +396,7 @@ local function style(o)
 	o.updateName = updateName
 	o.updateHealth = updateHealth
 	o.updateHealthFrequent = true
-	o.updateHealComm = updateHeals
+	o.updateHealPrediction = updateHeals
 	o.incHeal = 0
 	o.updatePower = updatePower
 	o.updatePowerFrequent = true
